@@ -1,0 +1,128 @@
+{
+  "restored": true,
+  "results": [
+    {
+      "encoding": 5,
+      "textBytes": 60,
+      "reply": "41",
+      "elapsedMs": 200
+    },
+    {
+      "encoding": 5,
+      "textBytes": 300,
+      "reply": "41",
+      "elapsedMs": 215
+    },
+    {
+      "encoding": 5,
+      "textBytes": 399,
+      "reply": "41",
+      "elapsedMs": 225
+    },
+    {
+      "encoding": 5,
+      "textBytes": 400,
+      "reply": "41",
+      "elapsedMs": 226
+    },
+    {
+      "encoding": 5,
+      "textBytes": 600,
+      "reply": "45",
+      "elapsedMs": 223
+    },
+    {
+      "encoding": 5,
+      "textBytes": 1000,
+      "reply": "45",
+      "elapsedMs": 262
+    },
+    {
+      "encoding": 5,
+      "textBytes": 1500,
+      "reply": "45",
+      "elapsedMs": 308
+    },
+    {
+      "encoding": 5,
+      "textBytes": 1800,
+      "reply": "45",
+      "elapsedMs": 330
+    },
+    {
+      "encoding": 5,
+      "textBytes": 1998,
+      "reply": "45",
+      "elapsedMs": 336
+    },
+    {
+      "encoding": 5,
+      "textBytes": 2000,
+      "reply": "45",
+      "elapsedMs": 333
+    },
+    {
+      "encoding": 1,
+      "textBytes": 100,
+      "reply": "41",
+      "elapsedMs": 203
+    },
+    {
+      "encoding": 1,
+      "textBytes": 300,
+      "reply": "41",
+      "elapsedMs": 219
+    },
+    {
+      "encoding": 1,
+      "textBytes": 399,
+      "reply": "41",
+      "elapsedMs": 229
+    },
+    {
+      "encoding": 1,
+      "textBytes": 400,
+      "reply": "41",
+      "elapsedMs": 228
+    },
+    {
+      "encoding": 1,
+      "textBytes": 600,
+      "reply": "45",
+      "elapsedMs": 226
+    },
+    {
+      "encoding": 1,
+      "textBytes": 1000,
+      "reply": "45",
+      "elapsedMs": 265
+    },
+    {
+      "encoding": 1,
+      "textBytes": 2000,
+      "reply": "45",
+      "elapsedMs": 346
+    },
+    {
+      "encoding": 1,
+      "textBytes": 3000,
+      "reply": "45",
+      "elapsedMs": 434
+    },
+    {
+      "encoding": 1,
+      "textBytes": 3998,
+      "reply": "45",
+      "elapsedMs": 513
+    },
+    {
+      "encoding": 1,
+      "textBytes": 4000,
+      "reply": "45",
+      "elapsedMs": 514
+    }
+  ],
+  "date": "2026-09-10T16:31:58.9647886Z",
+  "port": "COM9",
+  "baud": 115200
+}

@@ -1,0 +1,17 @@
+[package]
+name = "zhiliao-studio"
+version = "1.0.0"
+description = "知了1号 TTS 模块工作台"
+authors = ["Cans518 <798061533@qq.com>"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serialport = "4"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.52", features = ["Win32_Devices_DeviceAndDriverInstallation", "Win32_Foundation"] }
