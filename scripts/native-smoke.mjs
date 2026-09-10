@@ -1,0 +1,100 @@
+import { chromium, expect } from '@playwright/test';
+import { spawn } from 'node:child_process';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import net from 'node:net';
+
+if(process.platform!=='win32')throw new Error('原生测试需要 Windows WebView2');
+const port=9236;
+const server=net.createServer();
+await new Promise((resolve,reject)=>server.once('error',reject).listen(port,'127.0.0.1',resolve));
+await new Promise(resolve=>server.close(resolve));
+const report={runtime:'Tauri / WebView2',date:new Date().toISOString(),checks:[],hardwareTested:false};
+await mkdir('docs/screenshots',{recursive:true});
+const app=spawn(path.resolve('src-tauri/target/release/zhiliao-studio.exe'),[],{windowsHide:true,stdio:'ignore',env:{...process.env,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:`--remote-debugging-port=${port}`,WEBVIEW2_USER_DATA_FOLDER:path.resolve('test-results/native-profile')}});
+app.on('error',e=>{console.error(e);process.exitCode=1;});
+let browser;
+try{
+  for(let attempt=0;attempt<90;attempt++){
+    if(app.exitCode!==null)throw new Error(`原生程序提前退出：${app.exitCode}`);
+    try{const response=await fetch(`http://127.0.0.1:${port}/json/version`);if(response.ok)break;}catch{}
+    await new Promise(resolve=>setTimeout(resolve,500));
+  }
+  browser=await chromium.connectOverCDP(`http://127.0.0.1:${port}`);
+  const context=browser.contexts()[0];
+  let page=context.pages()[0];
+  if(!page)page=await context.waitForEvent('page');
+  await expect(page.getByRole('heading',{name:/知了1号/})).toBeVisible();
+  if(!/tauri\.localhost|tauri:\/\//.test(page.url()))throw new Error('不是打包后的应用页面');
+  report.checks.push('发布程序离线资源载入');
+  const nativePorts=await page.evaluate(()=>window.__TAURI_INTERNALS__.invoke('ports'));
+  report.ports=nativePorts;
+  if(nativePorts.some(port=>!port.name||!port.description))throw new Error('串口信息缺少名称或描述');
+  report.checks.push(`真实串口枚举成功：${nativePorts.length} 个端口`);
+  await page.getByRole('combobox',{name:'通道',exact:true}).selectOption('serial');
+  await page.getByRole('combobox',{name:'端口',exact:true}).click();
+  if(nativePorts.some(port=>port.name==='COM9')){
+    await expect(page.getByRole('option',{name:/\(COM9\)/})).toBeVisible();
+    await page.getByRole('option',{name:/\(COM9\)/}).click();
+    await page.getByRole('combobox',{name:'端口',exact:true}).click();
+  }
+  await page.screenshot({path:'docs/screenshots/native-ports.png',animations:'disabled'});
+  await page.keyboard.press('Escape');
+  report.checks.push('Windows友好名称与自定义串口列表');
+  const invalidFrame=await page.evaluate(async()=>{try{await window.__TAURI_INTERNALS__.invoke('send',{bytes:[0xfd,0,1,0x99]});return false;}catch{return true;}});
+  if(!invalidFrame)throw new Error('后端未拒绝无效命令');
+  report.checks.push('原生后端拒绝非法命令');
+  const captureGuard=await page.evaluate(async()=>{try{await window.__TAURI_INTERNALS__.invoke('capture_version');return false;}catch(error){return String(error).includes('串口未连接');}});
+  if(!captureGuard)throw new Error('版本采集IPC未正确注册或缺少连接校验');
+  report.checks.push('原生版本采集IPC注册与连接校验');
+  await page.getByRole('combobox',{name:'通道',exact:true}).selectOption('sim');
+  await page.getByRole('button',{name:'连接设备',exact:true}).click();
+  await expect(page.getByText('已从模块读取')).toBeVisible();
+  await page.getByRole('button',{name:'开始播报'}).click();
+  await expect(page.getByText(/1 \/ 1 段已完成/)).toBeVisible();
+  report.checks.push('原生窗口中的模拟连接、配置同步与播放完成');
+  const downloads = path.resolve('test-results/native-downloads');
+  await mkdir(downloads,{recursive:true});
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:downloads,eventsEnabled:true});
+  await page.getByRole('button',{name:'导出日志',exact:true}).click();
+  await expect.poll(async()=>{try{return await readFile(path.join(downloads,'知了1号-通信.log'),'utf8');}catch{return '';}}).toContain('FD 00 01 21');
+  report.checks.push('原生 WebView2 日志导出包含真实生成的收发报文');
+  await page.screenshot({path:'docs/screenshots/native-release.png'});
+  await page.getByRole('button',{name:'最大化或还原'}).click();
+  await expect.poll(()=>page.evaluate(()=>window.__TAURI_INTERNALS__.invoke('plugin:window|is_maximized',{label:'main'}))).toBe(true);
+  await page.getByRole('button',{name:'最大化或还原'}).click();
+  await expect.poll(()=>page.evaluate(()=>window.__TAURI_INTERNALS__.invoke('plugin:window|is_maximized',{label:'main'}))).toBe(false);
+  report.checks.push('原生最大化与还原');
+  await page.getByRole('button',{name:'设置',exact:true}).click();
+  await expect(page.getByRole('dialog',{name:'设置',exact:true})).toBeVisible();
+  await page.screenshot({path:'docs/screenshots/native-settings.png',animations:'disabled'});
+  report.checks.push('状态栏设置打开模态子窗口');
+  await page.getByRole('combobox',{name:'界面语言',exact:true}).selectOption('en');
+  await expect(page.getByRole('dialog',{name:'Settings',exact:true})).toBeVisible();
+  await expect.poll(()=>page.evaluate(()=>window.__TAURI_INTERNALS__.invoke('plugin:window|title',{label:'main'}))).toBe('Cicada One · CICADA-1');
+  await page.screenshot({path:'docs/screenshots/native-settings-en.png',animations:'disabled'});
+  await page.getByRole('combobox',{name:'Interface language',exact:true}).selectOption('zh');
+  report.checks.push('中英文设置、原生窗口标题同步，串口会话保持');
+  await page.getByRole('button',{name:'读取版本并断开',exact:true}).click();
+  await expect(page.getByLabel('最近版本原始响应')).toContainText('58 53 49 4D');
+  await page.getByRole('button',{name:'完成',exact:true}).click();
+  await expect(page.getByRole('button',{name:'设置',exact:true})).toBeFocused();
+  await expect(page.getByRole('button',{name:'连接设备',exact:true})).toBeEnabled();
+  report.checks.push('原生窗口版本原始响应展示与查询后断开（模拟）');
+  await page.getByRole('combobox',{name:'通道',exact:true}).selectOption('serial');
+  await page.getByRole('combobox',{name:'端口',exact:true}).click();
+  await page.getByPlaceholder('选择或输入 COM 口').fill('COM99999');
+  await page.getByRole('button',{name:'使用端口',exact:true}).click();
+  await page.getByRole('button',{name:'连接设备',exact:true}).click();
+  await expect(page.getByRole('alert')).toBeVisible();
+  report.checks.push('真实串口打开失败的可见错误反馈');
+  await page.getByRole('button',{name:'关闭',exact:true}).click();
+  await expect.poll(()=>app.exitCode,{timeout:7000}).not.toBeNull();
+  report.checks.push('原生关闭按钮退出进程');
+  await writeFile('docs/screenshots/native-report.json',JSON.stringify(report,null,2));
+  console.log(JSON.stringify(report,null,2));
+}finally{
+  if(browser)await browser.close().catch(()=>{});
+  if(app.exitCode===null)app.kill();
+}

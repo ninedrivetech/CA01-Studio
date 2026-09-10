@@ -1,0 +1,593 @@
+{
+  "port": "COM9",
+  "baud": 115200,
+  "events": [
+    {
+      "hex": "FD 00 01 21",
+      "direction": "TX",
+      "time": "2026-09-10T16:19:53.4443650Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:19:53.5351710Z"
+    },
+    {
+      "hex": "FD 00 01 05",
+      "direction": "TX",
+      "time": "2026-09-10T16:19:53.7140473Z"
+    },
+    {
+      "hex": "5F A8 03 16 06 09 38 01 01 00 00 00 00 00 00 00 00 00",
+      "direction": "RX",
+      "time": "2026-09-10T16:19:53.7978339Z"
+    },
+    {
+      "hex": "FD 00 01 0B",
+      "direction": "TX",
+      "time": "2026-09-10T16:19:53.9746113Z"
+    },
+    {
+      "hex": "5E 00 00 00 00 00 32 00 00 00 00 00 00",
+      "direction": "RX",
+      "time": "2026-09-10T16:19:54.0237757Z"
+    },
+    {
+      "hex": "FD 00 13 06 01 5B 6D 33 5D 5B 76 33 5D 5B 73 31 30 5D 5B 74 35 5D",
+      "direction": "TX",
+      "time": "2026-09-10T16:19:54.2392559Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:19:54.2606376Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:19:54.3567394Z"
+    },
+    {
+      "hex": "FD 00 01 05",
+      "direction": "TX",
+      "time": "2026-09-10T16:19:54.5325074Z"
+    },
+    {
+      "hex": "5F A8 03 0A 03 05 03 01 01 00 00 00 00 00 00 00 00 00",
+      "direction": "RX",
+      "time": "2026-09-10T16:19:54.5627804Z"
+    },
+    {
+      "hex": "FD 00 14 01 00 D6 AA C1 CB C4 A3 BF E9 B1 E0 C2 EB B2 E2 CA D4 A1 A3",
+      "direction": "TX",
+      "time": "2026-09-10T16:19:54.7494336Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:19:54.7731314Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:19:56.4201252Z"
+    },
+    {
+      "hex": "FD 00 14 01 01 D6 AA C1 CB C4 A3 BF E9 B1 E0 C2 EB B2 E2 CA D4 A1 A3",
+      "direction": "TX",
+      "time": "2026-09-10T16:19:56.6006154Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:19:56.6242631Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:19:58.2803032Z"
+    },
+    {
+      "hex": "FD 00 14 01 03 E5 77 86 4E 21 6A 57 57 16 7F 01 78 4B 6D D5 8B 02 30",
+      "direction": "TX",
+      "time": "2026-09-10T16:19:58.4593635Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:19:58.4803738Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:00.1350032Z"
+    },
+    {
+      "hex": "FD 00 14 01 04 77 E5 4E 86 6A 21 57 57 7F 16 78 01 6D 4B 8B D5 30 02",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:00.3115728Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:00.3357865Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:01.9901293Z"
+    },
+    {
+      "hex": "FD 00 1D 01 05 E7 9F A5 E4 BA 86 E6 A8 A1 E5 9D 97 E7 BC 96 E7 A0 81 E6 B5 8B E8 AF 95 E3 80 82",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:02.1649183Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:02.1894757Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:03.8411763Z"
+    },
+    {
+      "hex": "FD 00 06 06 01 5B 6D 33 5D",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:04.0043873Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:04.0267571Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:04.0863822Z"
+    },
+    {
+      "hex": "FD 00 17 01 05 E7 9F A5 E4 BA 86 E8 AF AD E9 9F B3 E6 B5 8B E8 AF 95 E3 80 82",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:04.2548829Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:04.2784961Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:05.5608936Z"
+    },
+    {
+      "hex": "FD 00 07 06 01 5B 6D 35 31 5D",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:05.7350756Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:05.7571977Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:05.8169907Z"
+    },
+    {
+      "hex": "FD 00 17 01 05 E7 9F A5 E4 BA 86 E8 AF AD E9 9F B3 E6 B5 8B E8 AF 95 E3 80 82",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:05.9975895Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:06.0219564Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:07.3589207Z"
+    },
+    {
+      "hex": "FD 00 07 06 01 5B 6D 35 32 5D",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:07.5438044Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:07.5667072Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:07.6260524Z"
+    },
+    {
+      "hex": "FD 00 17 01 05 E7 9F A5 E4 BA 86 E8 AF AD E9 9F B3 E6 B5 8B E8 AF 95 E3 80 82",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:07.8092081Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:07.8335160Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:09.1693909Z"
+    },
+    {
+      "hex": "FD 00 07 06 01 5B 6D 35 33 5D",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:09.3406487Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:09.3633691Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:09.4467875Z"
+    },
+    {
+      "hex": "FD 00 17 01 05 E7 9F A5 E4 BA 86 E8 AF AD E9 9F B3 E6 B5 8B E8 AF 95 E3 80 82",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:09.6225071Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:09.6463611Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:10.9604478Z"
+    },
+    {
+      "hex": "FD 00 07 06 01 5B 6D 35 34 5D",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:11.1254372Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:11.1480957Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:11.2074247Z"
+    },
+    {
+      "hex": "FD 00 17 01 05 E7 9F A5 E4 BA 86 E8 AF AD E9 9F B3 E6 B5 8B E8 AF 95 E3 80 82",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:11.3886349Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:11.4126477Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:12.6526614Z"
+    },
+    {
+      "hex": "FD 00 07 06 01 5B 6D 35 35 5D",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:12.8186257Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:12.8412457Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:12.9007892Z"
+    },
+    {
+      "hex": "FD 00 17 01 05 E7 9F A5 E4 BA 86 E8 AF AD E9 9F B3 E6 B5 8B E8 AF 95 E3 80 82",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:13.0695015Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:13.0937651Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:14.3279571Z"
+    },
+    {
+      "hex": "FD 00 07 06 01 5B 6D 35 36 5D",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:14.5068503Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:14.5289567Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:14.5883110Z"
+    },
+    {
+      "hex": "FD 00 17 01 05 E7 9F A5 E4 BA 86 E8 AF AD E9 9F B3 E6 B5 8B E8 AF 95 E3 80 82",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:14.7531327Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:14.7771336Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:16.0301533Z"
+    },
+    {
+      "hex": "FD 00 07 06 01 5B 6D 35 37 5D",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:16.2111564Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:16.2321208Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:16.2911644Z"
+    },
+    {
+      "hex": "FD 00 17 01 05 E7 9F A5 E4 BA 86 E8 AF AD E9 9F B3 E6 B5 8B E8 AF 95 E3 80 82",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:16.4599667Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:16.4839319Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:17.7200286Z"
+    },
+    {
+      "hex": "FD 00 74 01 05 E7 8E B0 E5 9C A8 E6 B5 8B E8 AF 95 E6 9A 82 E5 81 9C E5 92 8C E7 BB A7 E7 BB AD E3 80 82 E8 BF 99 E6 98 AF E4 B8 80 E6 AE B5 E7 A8 8D E9 95 BF E7 9A 84 E8 AF AD E9 9F B3 EF BC 8C E7 94 A8 E4 BA 8E E9 AA 8C E8 AF 81 E6 92 AD E6 94 BE E8 BF 87 E7 A8 8B E4 B8 AD E6 8E A7 E5 88 B6 E5 91 BD E4 BB A4 E6 98 AF E5 90 A6 E6 9C 89 E6 95 88 E3 80 82",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:17.9037937Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:17.9305330Z"
+    },
+    {
+      "hex": "FD 00 01 03",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:18.1028281Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:18.1123750Z"
+    },
+    {
+      "hex": "FD 00 01 04",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:18.2901626Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:18.2996886Z"
+    },
+    {
+      "hex": "FD 00 01 02",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:18.4774453Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:18.4867882Z"
+    },
+    {
+      "hex": "FD 00 01 21",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:18.6671767Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:18.6681060Z"
+    },
+    {
+      "hex": "FD 00 01 02",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:18.8562413Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:18.8568717Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:18.8782188Z"
+    },
+    {
+      "hex": "FD 00 34 06 01 5B 73 32 32 5D 5B 76 36 5D 5B 74 39 5D 5B 6D 35 36 5D 5B 78 31 5D 5B 66 31 5D 5B 6E 30 5D 5B 79 30 5D 5B 62 30 5D 5B 7A 30 5D 5B 69 30 5D 5B 72 30 5D",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:19.0605911Z"
+    },
+    {
+      "hex": "41",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:19.0869931Z"
+    },
+    {
+      "hex": "4F",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:19.1463198Z"
+    },
+    {
+      "hex": "FD 00 01 05",
+      "direction": "TX",
+      "time": "2026-09-10T16:20:19.3242303Z"
+    },
+    {
+      "hex": "5F A8 03 16 06 09 38 01 01 00 00 00 00 00 00 00 00 00",
+      "direction": "RX",
+      "time": "2026-09-10T16:20:19.3544150Z"
+    }
+  ],
+  "audioQualityAssessed": false,
+  "checks": [
+    {
+      "passed": true,
+      "parameters": [
+        95,
+        168,
+        3,
+        22,
+        6,
+        9,
+        56,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "special": [
+        94,
+        0,
+        0,
+        0,
+        0,
+        0,
+        50,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "name": "initial configuration"
+    },
+    {
+      "name": "parameter save/readback",
+      "passed": true
+    },
+    {
+      "name": "encoding 0 synthesis acknowledged/completed",
+      "passed": true
+    },
+    {
+      "name": "encoding 1 synthesis acknowledged/completed",
+      "passed": true
+    },
+    {
+      "name": "encoding 3 synthesis acknowledged/completed",
+      "passed": true
+    },
+    {
+      "name": "encoding 4 synthesis acknowledged/completed",
+      "passed": true
+    },
+    {
+      "name": "encoding 5 synthesis acknowledged/completed",
+      "passed": true
+    },
+    {
+      "name": "voice 3 synthesis acknowledged/completed",
+      "passed": true
+    },
+    {
+      "name": "voice 51 synthesis acknowledged/completed",
+      "passed": true
+    },
+    {
+      "name": "voice 52 synthesis acknowledged/completed",
+      "passed": true
+    },
+    {
+      "name": "voice 53 synthesis acknowledged/completed",
+      "passed": true
+    },
+    {
+      "name": "voice 54 synthesis acknowledged/completed",
+      "passed": true
+    },
+    {
+      "name": "voice 55 synthesis acknowledged/completed",
+      "passed": true
+    },
+    {
+      "name": "voice 56 synthesis acknowledged/completed",
+      "passed": true
+    },
+    {
+      "name": "voice 57 synthesis acknowledged/completed",
+      "passed": true
+    },
+    {
+      "name": "pause/resume/stop and idle query",
+      "passed": true
+    },
+    {
+      "passed": true,
+      "readback": [
+        95,
+        168,
+        3,
+        22,
+        6,
+        9,
+        56,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "name": "restore original voice parameters"
+    }
+  ],
+  "date": "2026-09-10T16:20:19.3675915Z"
+}
