@@ -4,6 +4,15 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 
 export type Language = "zh" | "en";
 export const english: Record<string, string> = {
+  "关闭下载弹窗": "Close download dialog", "取消": "Cancel", "下载文件": "Download file",
+  "下载当前筛选结果，保存打开弹窗时的日志快照。": "Download the filtered logs captured when this dialog opened.",
+  "当前没有可导出的日志，请调整筛选或连接设备后重试。": "No logs to export. Adjust the filters or connect a device and try again.",
+  "关于": "About", "作者": "Author", "联系邮箱": "Contact email",
+  "正在准备文本…": "Preparing text…", "文本处理失败，请重新载入应用": "Text processing failed. Reload the app.",
+  "文件不是有效的 UTF-8 文本，请转换编码后重新导入": "This file is not valid UTF-8. Convert its encoding and import again.",
+  "上一段": "Previous segment", "下一段": "Next segment", "无可发送报文": "No frame to send",
+  "无匹配记录": "No matching records", "清除筛选": "Clear filters", "播报进度": "Playback progress",
+  "展开日志": "Expand logs", "收起日志": "Collapse logs",
   "知了1号": "Cicada One", "语音工作台": "Voice Studio", "让文字，自然发声。": "Give your words a voice.",
   "设备连接": "Connection", "通道": "Mode", "真实串口": "Serial device", "模拟设备": "Simulator", "端口": "Port",
   "选择串口": "Select a port", "串口设备": "Serial device", "搜索串口设备": "Search serial devices",
@@ -52,7 +61,7 @@ export const english: Record<string, string> = {
   "初鸣": "First Song", "林鸣": "Grove", "夜鸣": "Nocturne", "明翼": "Clearwing",
   "晨光暖白 · 日间专注": "Warm white · Daytime focus", "叶影浅绿 · 柔和自然": "Leaf green · Soft and natural",
   "月下深青 · 夜间工作": "Deep teal · Night work", "墨底亮金 · 高对比": "Ink and gold · High contrast",
-  "密度": "Density", "紧凑": "Compact", "舒适": "Comfortable", "动态效果": "Motion", "跟随系统": "Follow system",
+  "动态效果": "Motion", "跟随系统": "Follow system",
   "减少动态效果": "Reduce motion", "外观即时生效并自动保存在本机。": "Appearance updates instantly and is saved locally.",
   "界面语言": "Interface language", "语言切换不改变播报文本与设备参数。": "Changing language does not alter speech text or device parameters.",
   "通信记录": "Communication log", "条": "entries", "搜索日志": "Search logs", "搜索报文": "Search messages", "日志方向": "Log direction",
