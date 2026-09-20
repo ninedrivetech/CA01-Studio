@@ -1,5 +1,5 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
-import { frame, ReplyParser, type Reply } from "./protocol";
+import { frame, ReplyParser, type Reply } from "./protocolCore";
 
 export interface PortInfo {
   name: string;
@@ -20,6 +20,8 @@ export interface Snapshot {
   busy: boolean;
   status: string;
   progress: string;
+  completedSegments: number;
+  totalSegments: number;
   logs: Log[];
   parameters: number[] | null;
   special: number[] | null;
@@ -27,6 +29,7 @@ export interface Snapshot {
   version: number[] | null;
 }
 type Pending = {
+  command: number;
   expected: number[];
   resolve: (r: Reply) => void;
   reject: (e: Error) => void;
@@ -41,6 +44,8 @@ export class Device {
     busy: false,
     status: "未连接",
     progress: "尚未开始",
+    completedSegments: 0,
+    totalSegments: 0,
     logs: [],
     parameters: null,
     special: null,
@@ -50,6 +55,10 @@ export class Device {
   private listeners = new Set<() => void>();
   private parser = new ReplyParser();
   private pending: Pending | null = null;
+  private channel: Promise<void> = Promise.resolve();
+  private scheduledRequests = 0;
+  private playbackEpoch = 0;
+  private playbackPaused = false;
   private generation = 0;
   private queue: number[][] = [];
   private total = 0;
@@ -133,6 +142,8 @@ export class Device {
   }
   async disconnect() {
     ++this.generation;
+    ++this.playbackEpoch;
+    this.playbackPaused = false;
     this.queue = [];
     clearTimeout(this.playTimer);
     this.rejectPending(new Error("连接已断开"));
@@ -146,6 +157,8 @@ export class Device {
       parameters: null,
       special: null,
       progress: "尚未开始",
+      completedSegments: 0,
+      totalSegments: 0,
     });
   }
   private fail(e: unknown) {
@@ -191,7 +204,8 @@ export class Device {
         this.update({ status: "播报中" });
       if (reply.code === 0x4b) this.update({ status: "已休眠" });
       if (reply.code === 0x4a) this.update({ status: "空闲" });
-      if (reply.code === 0x41 && this.queue.length) this.acknowledged = true;
+      if (reply.code === 0x41 && this.queue.length && this.pending?.command === 1)
+        this.acknowledged = true;
       const pending = this.pending;
       if (pending?.expected.includes(reply.code)) {
         clearTimeout(pending.timer);
@@ -199,24 +213,44 @@ export class Device {
         pending.resolve(reply);
       }
       if (reply.code === 0x4f) {
-        this.update({ status: "空闲" });
         if (this.queue.length && this.acknowledged) {
           this.queue.shift();
           this.completed++;
           this.acknowledged = false;
           this.update({
             progress: `${this.completed} / ${this.total} 段已完成`,
+            completedSegments: this.completed,
           });
-          if (this.queue.length)
+          const epoch = this.playbackEpoch;
+          if (this.queue.length && !this.playbackPaused)
             void this.nextSegment().catch((e) => {
+              if (!this.state.connected || epoch !== this.playbackEpoch) return;
               this.queue = [];
+              this.update({ status: "命令失败" });
               this.fail(e);
             });
         }
+        this.update({ status: this.queue.length ? this.playbackPaused ? "已暂停" : "播报中" : "空闲" });
       }
     }
   }
-  private async request(bytes: number[], expected: number[]) {
+  private async request(bytes: number[], expected: number[], allowed = () => true) {
+    const generation = this.generation;
+    const previous = this.channel;
+    let release!: () => void;
+    this.channel = new Promise<void>((resolve) => { release = resolve; });
+    this.scheduledRequests++;
+    try {
+      await previous;
+      if (generation !== this.generation) throw new Error("连接已断开");
+      if (!allowed()) return;
+      return await this.requestNow(bytes, expected);
+    } finally {
+      this.scheduledRequests--;
+      release();
+    }
+  }
+  private async requestNow(bytes: number[], expected: number[]) {
     if (!this.state.connected) throw new Error("请先连接设备");
     if (this.pending) throw new Error("上一条命令尚未完成");
     const generation = this.generation;
@@ -227,7 +261,7 @@ export class Device {
         );
         void this.disconnect().catch((e) => this.fail(e));
       }, 15000);
-      this.pending = { expected, resolve, reject, timer };
+      this.pending = { command: bytes[3], expected, resolve, reject, timer };
     });
     // Attach rejection handler before the potentially slow native send.
     const settled = response.then(
@@ -325,47 +359,90 @@ export class Device {
     )
       throw new Error("请先停止当前播报或唤醒设备");
     this.queue = frames.map((f) => [...f]);
+    ++this.playbackEpoch;
+    const epoch = this.playbackEpoch;
+    this.playbackPaused = false;
     this.total = frames.length;
     this.completed = 0;
+    this.update({ completedSegments: 0, totalSegments: this.total });
     try {
       await this.nextSegment();
     } catch (e) {
-      this.queue = [];
+      if (epoch === this.playbackEpoch) {
+        this.queue = [];
+        if (this.state.connected) this.update({ status: "命令失败" });
+      }
       throw e;
     }
   }
   private async nextSegment() {
     const generation = this.generation;
+    const epoch = this.playbackEpoch;
+    const current = this.queue[0];
+    const allowed = () => generation === this.generation && epoch === this.playbackEpoch &&
+      this.queue[0] === current && !!current && !this.playbackPaused;
     await delay(40);
-    if (generation !== this.generation || !this.queue.length) return;
+    if (!allowed()) return;
     this.acknowledged = false;
     this.update({
       status: "播报中",
       progress: `${this.completed} / ${this.total} 段已完成`,
     });
-    await this.request(this.queue[0], [0x41]);
+    await this.request(current, [0x41], allowed);
   }
   async control(command: number) {
+    // Reject before mutating playback state: the device may still be playing
+    // when another request owns the response channel.
+    if (!this.state.connected) throw new Error("请先连接设备");
+    if (this.pending || this.scheduledRequests) throw new Error("上一条命令尚未完成");
     if (command === 2) {
+      ++this.playbackEpoch;
+      this.playbackPaused = false;
       this.queue = [];
       this.acknowledged = false;
       clearTimeout(this.playTimer);
     }
+    // Between segments there is no active device utterance to pause/resume.
+    if (command === 3 && this.queue.length && !this.acknowledged) {
+      ++this.playbackEpoch;
+      this.playbackPaused = true;
+      this.update({ status: "已暂停" });
+      return;
+    }
+    if (command === 4 && this.queue.length && !this.acknowledged) {
+      this.playbackPaused = false;
+      await this.nextSegment();
+      return;
+    }
     if (command === 0x88 && (this.queue.length || this.state.status !== "空闲"))
       throw new Error("请先停止播报再休眠");
-    await this.request(
-      frame(command),
-      command === 0x21
-        ? [0x4e, 0x4f]
-        : command === 0xff
-          ? [0x4a]
-          : command === 0x88
-            ? [0x4b]
-            : [0x41],
-    );
+    const managedPlayback = this.queue.length > 0;
+    const wasPaused = this.playbackPaused;
+    const epoch = this.playbackEpoch;
+    const generation = this.generation;
+    // A completion reply may arrive before the pause acknowledgement.
+    // Record intent now so it cannot schedule another segment in that gap.
+    if (command === 3) this.playbackPaused = true;
+    if (command === 4) this.playbackPaused = false;
+    try {
+      await this.request(
+        frame(command),
+        command === 0x21
+          ? [0x4e, 0x4f]
+          : command === 0xff
+            ? [0x4a]
+            : command === 0x88
+              ? [0x4b]
+              : [0x41],
+      );
+    } catch (error) {
+      if (epoch === this.playbackEpoch) this.playbackPaused = wasPaused;
+      throw error;
+    }
+    if (generation !== this.generation) return;
     if (command === 2) this.update({ status: "空闲", progress: "已停止" });
-    if (command === 3) this.update({ status: "已暂停" });
-    if (command === 4) this.update({ status: "播报中" });
+    if (command === 3 || command === 4)
+      this.update({ status: managedPlayback && !this.queue.length ? "空闲" : command === 3 ? "已暂停" : "播报中" });
   }
   private simulate(bytes: number[]) {
     const command = bytes[3];
