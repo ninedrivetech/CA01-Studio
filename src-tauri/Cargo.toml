@@ -2,8 +2,11 @@
 name = "zhiliao-studio"
 version = "1.0.0"
 description = "知了1号 TTS 模块工作台"
-authors = ["Cans518 <798061533@qq.com>"]
+authors = ["Mzee <xiemaths@outlook.com>"]
 edition = "2021"
+
+[package.metadata.studio]
+company = "上海玖驱科技有限公司"
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
