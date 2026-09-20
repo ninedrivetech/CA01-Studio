@@ -58,6 +58,9 @@ try{
   const cdp = await context.newCDPSession(page);
   await cdp.send('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:downloads,eventsEnabled:true});
   await page.getByRole('button',{name:'导出日志',exact:true}).click();
+  await expect(page.getByRole('dialog',{name:'导出日志'})).toBeVisible();
+  await page.screenshot({path:'docs/screenshots/native-download.png'});
+  await page.getByRole('button',{name:'下载文件',exact:true}).click();
   await expect.poll(async()=>{try{return await readFile(path.join(downloads,'知了1号-通信.log'),'utf8');}catch{return '';}}).toContain('FD 00 01 21');
   report.checks.push('原生 WebView2 日志导出包含真实生成的收发报文');
   await page.screenshot({path:'docs/screenshots/native-release.png'});
@@ -68,6 +71,11 @@ try{
   report.checks.push('原生最大化与还原');
   await page.getByRole('button',{name:'设置',exact:true}).click();
   await expect(page.getByRole('dialog',{name:'设置',exact:true})).toBeVisible();
+  const about=page.getByRole('region',{name:'关于',exact:true});
+  await expect(about).toContainText('Mzee');
+  await expect(about).toContainText('上海玖驱科技有限公司');
+  await expect(about.getByRole('link',{name:'xiemaths@outlook.com'})).toHaveAttribute('href','mailto:xiemaths@outlook.com');
+  report.checks.push('作者、公司和联系邮箱完整展示');
   await page.screenshot({path:'docs/screenshots/native-settings.png',animations:'disabled'});
   report.checks.push('状态栏设置打开模态子窗口');
   await page.getByRole('combobox',{name:'界面语言',exact:true}).selectOption('en');
