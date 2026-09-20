@@ -1,8 +1,9 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { Settings2, Palette, X, Check } from "lucide-react";
 import { device } from "../lib/device";
-import { hex } from "../lib/protocol";
+import { hex } from "../lib/protocolCore";
 import { useI18n, type Language } from "../lib/i18n";
+import { about } from "../lib/about";
 export const themes = [
     { id: "amber", name: "初鸣", code: "First Song", description: "晨光暖白 · 日间专注" },
     { id: "forest", name: "林鸣", code: "Grove", description: "叶影浅绿 · 柔和自然" },
@@ -20,8 +21,6 @@ interface Props {
     setSpecial: (values: string[]) => void;
     theme: string;
     setTheme: (value: string) => void;
-    density: string;
-    setDensity: (value: string) => void;
     motion: string;
     setMotion: (value: string) => void;
     run: (action: () => Promise<unknown>, success?: string) => Promise<void>;
@@ -29,7 +28,7 @@ interface Props {
 }
 export function SettingsDialog(props: Props) {
     const { t, language, setLanguage } = useI18n();
-    const { open, onClose, status, disabled, configuringDisabled, version, special, setSpecial, theme, setTheme, density, setDensity, motion, setMotion, run, feedback } = props;
+    const { open, onClose, status, disabled, configuringDisabled, version, special, setSpecial, theme, setTheme, motion, setMotion, run, feedback } = props;
     const dialog = useRef<HTMLDialogElement>(null);
     useEffect(() => {
         const element = dialog.current!;
@@ -41,7 +40,7 @@ export function SettingsDialog(props: Props) {
     return (<dialog ref={dialog} className="settings-dialog" aria-labelledby="settings-title" onKeyDown={(event) => {
             if (event.key !== "Tab")
                 return;
-            const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]')).filter(element => element.getClientRects().length);
+            const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex="0"]')).filter(element => element.getClientRects().length);
             const first = controls[0], last = controls[controls.length - 1];
             if (event.shiftKey && document.activeElement === first) {
                 event.preventDefault();
@@ -92,10 +91,13 @@ export function SettingsDialog(props: Props) {
             </button>)}
           </div>
           <div className="appearance-options">
-            <label>{t("密度")}<select value={density} onChange={(e) => setDensity(e.target.value)}><option value="compact">{t("紧凑")}</option><option value="comfortable">{t("舒适")}</option></select></label>
             <label>{t("动态效果")}<select value={motion} onChange={(e) => setMotion(e.target.value)}><option value="system">{t("跟随系统")}</option><option value="reduced">{t("减少动态效果")}</option></select></label>
           </div>
           <p className="settings-hint">{t("外观即时生效并自动保存在本机。")}</p>
+        </section>
+        <section className="about-section" aria-label={t("关于")}>
+          <div><h3>{t("关于")} CICADA-1</h3><p>{about.company}</p></div>
+          <dl><div><dt>{t("作者")}</dt><dd>{about.author}</dd></div><div><dt>{t("联系邮箱")}</dt><dd><a href={`mailto:${about.email}`}>{about.email}</a></dd></div></dl>
         </section>
       </div>
       <footer className="settings-footer"><span>{t("知了1号 ")}<b>CICADA-1</b><small>1.0.0</small></span>

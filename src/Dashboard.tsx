@@ -3,7 +3,11 @@ import { AudioLines, Play, Pause, Square, RotateCcw, Settings, Languages, Radio,
 import { isTauri } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { device, type PortInfo } from "./lib/device";
-import { encodings, hex, speechFrames, voices } from "./lib/protocol";
+import { encodings, hex, voices } from "./lib/protocolCore";
+import { useSpeechFrames } from "./lib/useSpeechFrames";
+import { readTextFile } from "./lib/textFile";
+import { FramePreview } from "./components/FramePreview";
+import { DownloadDialog, type LogDownload } from "./components/DownloadDialog";
 import { SettingsDialog, themes } from "./components/SettingsDialog";
 import { PortPicker } from "./components/PortPicker";
 import { useI18n } from "./lib/i18n";
@@ -83,6 +87,7 @@ export default function Dashboard() {
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [logDownload, setLogDownload] = useState<LogDownload | null>(null);
     const [volume, setVolume] = useState(5);
     const [speed, setSpeed] = useState(5);
     const [pitch, setPitch] = useState(5);
@@ -100,10 +105,12 @@ export default function Dashboard() {
     const [special, setSpecial] = useState(["0", "0", "50"]);
     const [filter, setFilter] = useState("");
     const [direction, setDirection] = useState("ALL");
-    const [density, setDensity] = useState(initial("zhiliao.density", "compact"));
     const [motion, setMotion] = useState(initial("zhiliao.motion", "system"));
     const [logPaused, setLogPaused] = useState(false);
     const [frozenLogs, setFrozenLogs] = useState(state.logs);
+    const [logsExpanded, setLogsExpanded] = useState(false);
+    const draft = useRef(text);
+    draft.current = text;
     const editor = useRef<HTMLTextAreaElement>(null);
     const refresh = async () => {
         try {
@@ -124,16 +131,28 @@ export default function Dashboard() {
         remember("zhiliao.theme", theme);
     }, [theme]);
     useEffect(() => {
-        document.documentElement.dataset.density = density;
-        remember("zhiliao.density", density);
-    }, [density]);
-    useEffect(() => {
         document.documentElement.dataset.motion = motion;
         remember("zhiliao.motion", motion);
     }, [motion]);
     useEffect(() => {
-        remember("zhiliao.draft", text);
+        const timer = setTimeout(() => remember("zhiliao.draft", text), 300);
+        return () => clearTimeout(timer);
     }, [text]);
+    useEffect(() => {
+        const flush = () => remember("zhiliao.draft", draft.current);
+        window.addEventListener("pagehide", flush);
+        window.addEventListener("beforeunload", flush);
+        return () => {
+            flush();
+            window.removeEventListener("pagehide", flush);
+            window.removeEventListener("beforeunload", flush);
+        };
+    }, []);
+    useEffect(() => {
+        if (!notice) return;
+        const timer = setTimeout(() => setNotice(""), 5000);
+        return () => clearTimeout(timer);
+    }, [notice]);
     useEffect(() => {
         remember("zhiliao.port", port);
     }, [port]);
@@ -184,26 +203,11 @@ export default function Dashboard() {
     const playing = ["播报中", "已暂停"].includes(state.status);
     const sleeping = ["已休眠", "休眠待确认"].includes(state.status);
     const configuringDisabled = disabled || playing || sleeping;
-    let frames: number[][] = [];
-    let textError = "";
-    try {
-        frames = speechFrames(text, encoding);
-    }
-    catch (e) {
-        textError = String(e instanceof Error ? e.message : e);
-    }
+    const { frames, textError, preparing, characters, bytes } = useSpeechFrames(text, encoding);
     const logs = (logPaused ? frozenLogs : state.logs).filter((l) => (direction === "ALL" || l.direction === direction) &&
             `${t(l.message)} ${hex(l.bytes)}`
             .toLowerCase()
             .includes(filter.toLowerCase()));
-    function download(name: string, content: string) {
-        const url = URL.createObjectURL(new Blob([content], { type: "text/plain;charset=utf-8" }));
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = name;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
     function insert(value: string) {
         const el = editor.current;
         const start = el?.selectionStart ?? text.length;
@@ -225,7 +229,7 @@ export default function Dashboard() {
       <span>{t(error || state.error || notice)}</span>
       <button className="icon-button" aria-label={t("关闭提示")} onClick={() => { setError(""); device.clearError(); setNotice(""); }}><X size={15}/></button>
     </div>);
-    return (<div className="studio-shell">
+    return (<div className={`studio-shell${logsExpanded ? " logs-expanded" : ""}`}>
       <header className="studio-header">
         <div className="studio-brand" onMouseDown={(e) => {
             if (isTauri() && e.button === 0)
@@ -295,18 +299,17 @@ export default function Dashboard() {
               {examples.map(([name, value]) => <button key={name} onClick={() => setText(value)}>{t(name)}</button>)}
             </div>
             <label className="sr-only" htmlFor="speech-text">{t(" 播报文本 ")}</label>
-            <textarea id="speech-text" ref={editor} value={text} onChange={(e) => setText(e.target.value)} spellCheck={false}/>
+            <textarea id="speech-text" ref={editor} value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} aria-invalid={!!textError} aria-describedby={textError ? "speech-text-error" : undefined}/>
             <div className="text-meta">
               <span>
-                {Array.from(text).length}{t(" 字符 · ")}
-                {frames.reduce((n, f) => n + f.length - 5, 0)}{t(" 字节 ")}</span>
+                {preparing ? t("正在准备文本…") : <>{characters}{t(" 字符 · ")}{bytes}{t(" 字节 ")}</>}</span>
               <span>
                 {frames.length}{t(" 段 / 每段 ≤ ")}{encodings.find(e => e.id === encoding)?.limit} B
               </span>
             </div>
-            {textError && <p className="field-error">{t(textError)}</p>}
+            {textError && <p id="speech-text-error" className="field-error" role="alert">{t(textError)}</p>}
             <div className="play-controls">
-              <button className="primary" disabled={disabled || !!textError || playing || sleeping} onClick={() => void run(() => device.speak(frames))}>
+              <button className="primary" disabled={disabled || preparing || !frames.length || !!textError || playing || sleeping} onClick={() => void run(() => device.speak(frames))}>
                 <Play size={15}/>{t(" 开始播报 ")}</button>
               <button disabled={disabled || !playing} onClick={() => void run(() => device.control(state.status === "已暂停" ? 4 : 3))}>
                 {state.status === "已暂停" ? <Play size={15} /> : <Pause size={15} />}
@@ -321,9 +324,7 @@ export default function Dashboard() {
             const f = e.target.files?.[0];
             if (f)
                 void run(async () => {
-                    if (f.size > 1024 * 1024)
-                        throw new Error("文本文件最大 1 MB");
-                    setText(await f.text());
+                    setText(await readTextFile(f));
                 });
             e.target.value = "";
         }}/>
@@ -345,6 +346,7 @@ export default function Dashboard() {
               {marks.map(([name, value]) => <button key={name} title={value} onClick={() => insert(value)}>{t(name)}</button>)}
             </div>
             <div className="card-foot" aria-live="polite">
+              <progress className="playback-progress" aria-label={t("播报进度")} max={state.totalSegments || 1} value={state.completedSegments} />
               {t(state.progress)}
               {t(" · 收到播放完成回传后续播 ")}</div>
           </section>
@@ -390,6 +392,7 @@ export default function Dashboard() {
                 <Radio size={16}/>{t(" 通信记录 ")}<small>{logs.length}{t(" 条")}</small>
               </h2>
               <div className="log-tools">
+                <button className="icon-button" aria-label={t(logsExpanded ? "收起日志" : "展开日志")} title={t(logsExpanded ? "收起日志" : "展开日志")} aria-expanded={logsExpanded} onClick={() => setLogsExpanded(!logsExpanded)}><Maximize2 size={14}/></button>
                 <input aria-label={t("搜索日志")} placeholder={t("搜索报文")} value={filter} onChange={(e) => setFilter(e.target.value)}/>
                 <select aria-label={t("日志方向")} value={direction} onChange={(e) => setDirection(e.target.value)}>
                   <option value="ALL">{t("全部方向")}</option>
@@ -397,15 +400,15 @@ export default function Dashboard() {
                   <option>RX</option>
                   <option>INFO</option>
                 </select>
-                <button className="icon-button" title={t("暂停显示")} aria-label={t("暂停显示")} onClick={() => {
+                <button className="icon-button" title={t("暂停显示")} aria-label={t("暂停显示")} aria-pressed={logPaused} onClick={() => {
             setFrozenLogs(state.logs);
             setLogPaused(!logPaused);
         }}>
                   {logPaused ? <Play size={14} /> : <Pause size={14} />}
                 </button>
-                <button className="icon-button" title={t("导出日志")} aria-label={t("导出日志")} onClick={() => download(t("知了1号-通信.log"), logs
+                <button className="icon-button" title={t("导出日志")} aria-label={t("导出日志")} aria-haspopup="dialog" aria-expanded={!!logDownload} onClick={() => setLogDownload({ name: t("知了1号-通信.log"), count: logs.length, content: logs
             .map((l) => `${l.time} ${l.direction} ${t(l.message)} ${hex(l.bytes)}`)
-            .join("\n"))}>
+            .join("\n") })}>
                   <Download size={14}/>
                 </button>
                 <button className="icon-button" title={t("清空日志")} aria-label={t("清空日志")} onClick={() => {
@@ -418,19 +421,13 @@ export default function Dashboard() {
             </div>
             <div className="log-list">
               {logs.length ? logs.slice().reverse().map(l => <div className="log-row" key={l.id}><time>{l.time}</time><b className={l.direction}>{l.direction}</b><span>{t(l.message)}</span><code>{hex(l.bytes)}</code></div>) :
-                <div className="empty"><Radio size={24} /><span>{t("连接设备后，在这里查看命令和回传。")}</span></div>}
+                <div className="empty"><Radio size={24} /><span>{t(filter || direction !== "ALL" ? "无匹配记录" : "连接设备后，在这里查看命令和回传。")}</span>
+                  {(filter || direction !== "ALL") && <button onClick={() => { setFilter(""); setDirection("ALL"); }}>{t("清除筛选")}</button>}</div>}
             </div>
             <div className="card-foot">{t(" 最近 500 条 ·")}
               {t(logPaused ? "显示已暂停，后台继续接收" : "实时收发")} · HEX {t("原始报文")}</div>
           </section>
-          <section className="card preview" aria-label={t("发送预览")}>
-            <div className="card-heading">
-              <h2>{t("发送预览")}</h2>
-              <span>{t("第 1 / ")}{frames.length}{t(" 段")}</span>
-            </div>
-            <pre>{frames[0] ? hex(frames[0]) : t("输入文本后生成报文")}</pre>
-            <div className="card-foot">{t(" FD 帧头 · 大端长度 · 01 合成 · 编码 + 文本 ")}</div>
-          </section>
+          <FramePreview frames={frames} preparing={preparing} />
         </div>
       </main>
       <footer className="status-bar" aria-label={t("状态栏")}>
@@ -438,6 +435,7 @@ export default function Dashboard() {
         <span className="status-detail">{encodings.find(e => e.id === encoding)?.name} · {frames.length}{t(" 段 · 400 B 安全分段")}</span>
         <span className="status-theme">{t(themes.find(themeOption => themeOption.id === theme)?.name)}</span>
       </footer>
-      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} status={state.status} disabled={disabled} configuringDisabled={configuringDisabled} version={state.version} special={special} setSpecial={setSpecial} theme={theme} setTheme={setTheme} density={density} setDensity={setDensity} motion={motion} setMotion={setMotion} run={run} feedback={settingsOpen ? feedback : null}/>
+      <DownloadDialog file={logDownload} onClose={() => setLogDownload(null)}/>
+      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} status={state.status} disabled={disabled} configuringDisabled={configuringDisabled} version={state.version} special={special} setSpecial={setSpecial} theme={theme} setTheme={setTheme} motion={motion} setMotion={setMotion} run={run} feedback={settingsOpen ? feedback : null}/>
     </div>);
 }

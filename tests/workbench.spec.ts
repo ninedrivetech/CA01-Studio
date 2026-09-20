@@ -12,7 +12,8 @@ test('单页参数保存、播放暂停继续与日志导出',async({page})=>{
   await expect(page.getByRole('button',{name:'继续',exact:true})).toBeEnabled();
   await page.getByRole('button',{name:'继续',exact:true}).click();
   await expect(page.getByText(/1 \/ 1 段已完成/)).toBeVisible();
-  const download=page.waitForEvent('download');await page.getByRole('button',{name:'导出日志'}).click();expect((await download).suggestedFilename()).toBe('知了1号-通信.log');
+  await page.getByRole('button',{name:'导出日志'}).click();
+  const download=page.waitForEvent('download');await page.getByRole('button',{name:'下载文件'}).click();expect((await download).suggestedFilename()).toBe('知了1号-通信.log');
   await page.screenshot({path:'docs/screenshots/dashboard-amber.png'});
   await page.getByRole('button',{name:'切换日夜主题'}).click();await page.screenshot({path:'docs/screenshots/dashboard-night.png',animations:'disabled'});
   expect(errors).toEqual([]);
@@ -21,10 +22,6 @@ test('单页全部控制区在默认首屏内完整展示',async({page})=>{
   await page.goto('/');
   for(const viewport of [{width:1100,height:760},{width:1280,height:820},{width:1920,height:1080}]){
     await page.setViewportSize(viewport);
-    for(const density of ['compact','comfortable']){
-      await page.getByRole('button',{name:'设置',exact:true}).click();
-      await page.getByRole('combobox',{name:'密度',exact:true}).selectOption(density);
-      await page.getByRole('button',{name:'完成',exact:true}).click();
       expect(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1)).toBe(true);
       const clipped=await page.locator('button, select, input:not([type=file]), textarea, .card-foot').evaluateAll(elements=>elements.filter(el=>{
         const r=el.getBoundingClientRect();if(!r.width||!r.height)return false;
@@ -36,7 +33,6 @@ test('单页全部控制区在默认首屏内完整展示',async({page})=>{
       expect(clipped).toEqual([]);
       for(const name of ['文本与提示音','语音参数','通信记录','发送预览'])await expect(page.getByRole('region',{name,exact:true})).toBeVisible();
       await expect(page.getByRole('dialog')).not.toBeVisible();
-    }
   }
   await page.setViewportSize({width:375,height:812});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.screenshot({path:'docs/screenshots/dashboard-mobile.png',fullPage:true});
