@@ -1,5 +1,9 @@
 # 知了1号 · CICADA-1
 
+作者：**Mzee** · 联系邮箱：**xiemaths@outlook.com**
+
+公司：**上海玖驱科技有限公司**
+
 参考 `D:\Desktop\df01-studio` 的 Tauri 2 + Rust + React/TypeScript 架构，构建知了1号语音合成模块工作台。英文代号 **CICADA-1**，取自知了的英文 cicada。支持简体中文与English界面；首页集中展示连接、文本与提示音、语音参数、日志和发送预览，顶部状态栏的齿轮图标打开设置子窗口。
 
 ## 启动
@@ -27,6 +31,8 @@ Windows 便携程序位于 `release/zhiliao-1.0.0-windows-x64-portable.zip`，�
 - 13种提示音插入、示例文本、UTF-8文本文件导入、草稿保存、控制标记示例。
 - 功放特殊延时设置和读取，有回传/无回传两种休眠与唤醒，版本原始响应采集。
 - 原始HEX收发记录、搜索与方向过滤、暂停显示、清空、日志下载、待发送帧预览。
+- 文本在后台线程编码与分段，快速改写时只接受最新结果；UTF-8 导入严格校验，失败保留草稿；草稿防抖保存并在页面关闭时写入最新值。
+- 分段进度条、可展开日志、筛选恢复入口与逐段报文预览；手机首页扩大点击区域，短窗口支持滚动。
 - 初鸣 / First Song、林鸣 / Grove、夜鸣 / Nocturne、明翼 / Clearwing 四主题，保留原有主题偏好；设置子窗口支持键盘焦点循环、Esc关闭及返回设置按钮，外观即时保存。
 
 ## 验证
@@ -45,7 +51,9 @@ cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
 
 ## 目录
 
-`src/lib/protocol.ts` 编码与回传解析；`src/lib/device.ts` 会话状态、队列、模拟器；`src-tauri/src/main.rs` 原生串口及帧校验；`src/Dashboard.tsx` 首页工作台；`src/components/SettingsDialog.tsx` 设置子窗口；`tests/` 浏览器工作流测试。
+`src/lib/device.ts` 会话状态、队列、模拟器；`src-tauri/src/main.rs` 原生串口及帧校验；`src/Dashboard.tsx` 首页工作台；`src/components/SettingsDialog.tsx` 设置子窗口；`tests/` 浏览器工作流测试。
+
+`src/lib/protocolCore.ts` 为轻量帧定义与回传解析，`src/lib/protocol.ts` 负责文字编码与安全分段，`src/lib/speech.worker.ts` 在后台处理文本。设置中的“关于”区域展示作者与公司信息。
 
 ## 使用边界
 
