@@ -4,6 +4,8 @@ $port=[IO.Ports.SerialPort]::new('COM9',115200,[IO.Ports.Parity]::None,8,[IO.Por
 $port.ReadTimeout=100;$port.WriteTimeout=10000
 $results=[Collections.Generic.List[object]]::new()
 $original=$null
+$testError=$null
+$restoreError=$null
 function Send([int]$command,[byte[]]$payload=@()){
   Start-Sleep -Milliseconds 160
   $n=$payload.Length+1
@@ -45,15 +47,20 @@ try{
       Send 33;$null=Until @(79)
     }
   }
+}catch{
+  $testError=$_.Exception.Message
 }finally{
   $restored=$false
+  if($null -ne $original -and -not $port.IsOpen){$restoreError='Port closed before original volume could be restored'}
   if($port.IsOpen -and $null -ne $original){try{
     Send 2;$null=Until @(65)
     Send 6 ([byte[]](@(1)+[Text.Encoding]::ASCII.GetBytes('[v'+$original[4]+']')));$null=Until @(79)
     Send 5;$readback=Until @(95);$restored=$readback[4] -eq $original[4]
-  }catch{Write-Warning $_.Exception.Message}}
+    if(-not $restored){$restoreError='Original volume restoration mismatch'}
+  }catch{$restoreError=$_.Exception.Message}}
   if($port.IsOpen){$port.Close()};$port.Dispose()
   $reportName=if($Boundary){'com9-boundary-report.json'}else{'com9-capacity-report.json'}
-  @{date=[DateTime]::UtcNow.ToString('o');port='COM9';baud=115200;results=$results;restored=$restored}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $PSScriptRoot "..\docs\$reportName") -Encoding utf8
+  @{date=[DateTime]::UtcNow.ToString('o');port='COM9';baud=115200;results=$results;restored=$restored;error=$testError;restoreError=$restoreError}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $PSScriptRoot "..\docs\$reportName") -Encoding utf8
   Write-Output "Original volume restored: $restored"
 }
+if($testError -or $restoreError -or -not $restored){throw "Capacity test failed. Test: $testError; Restore: $restoreError"}

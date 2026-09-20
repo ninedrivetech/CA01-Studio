@@ -5,6 +5,8 @@ $port.WriteTimeout=10000
 $events=[System.Collections.Generic.List[object]]::new()
 $checks=[System.Collections.Generic.List[object]]::new()
 $original=$null
+$testError=$null
+$restoreError=$null
 function Send-Frame([byte]$command,[byte[]]$payload=@()) {
     Start-Sleep -Milliseconds 160
     $length=$payload.Length+1
@@ -66,7 +68,10 @@ try {
     Send-Frame 2;$null=Wait-Code 0x41
     Send-Frame 0x21;$null=Wait-Code 0x4F
     $checks.Add(@{name='pause/resume/stop and idle query';passed=$true})
+} catch {
+    $testError=$_.Exception.Message
 } finally {
+    if($null -ne $original -and -not $port.IsOpen){$restoreError='Port closed before original parameters could be restored'}
     if($port.IsOpen -and $null -ne $original) {
         try {
             Send-Frame 2;$null=Wait-Code 0x41
@@ -78,11 +83,12 @@ try {
             $same=$true
             for($i=3;$i -lt 15;$i++){if($original[$i] -ne $restored[$i]){$same=$false}}
             $checks.Add(@{name='restore original voice parameters';passed=$same;readback=@($restored)})
-            if(-not $same){Write-Warning 'Original parameter restoration mismatch'}
-        } catch { $checks.Add(@{name='restore original parameters';passed=$false;error=$_.Exception.Message}) }
+            if(-not $same){$restoreError='Original parameter restoration mismatch'}
+        } catch { $restoreError=$_.Exception.Message;$checks.Add(@{name='restore original parameters';passed=$false;error=$restoreError}) }
     }
     if($port.IsOpen){$port.Close()};$port.Dispose()
-    $report=@{date=[DateTime]::UtcNow.ToString('o');port='COM9';baud=115200;checks=$checks;events=$events;audioQualityAssessed=$false}
+    $report=@{date=[DateTime]::UtcNow.ToString('o');port='COM9';baud=115200;checks=$checks;events=$events;audioQualityAssessed=$false;error=$testError;restoreError=$restoreError}
     $report | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $PSScriptRoot '..\docs\com9-hardware-report.json') -Encoding utf8
     $checks | ConvertTo-Json -Depth 5
 }
+if($testError -or $restoreError){throw "Hardware test failed. Test: $testError; Restore: $restoreError"}
