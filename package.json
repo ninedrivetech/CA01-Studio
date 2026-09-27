@@ -1,6 +1,7 @@
 {
   "name": "zhiliao-studio",
   "version": "1.0.0",
+  "license": "Apache-2.0",
   "private": true,
   "author": "Mzee <xiemaths@outlook.com>",
   "company": "上海玖驱科技有限公司",
