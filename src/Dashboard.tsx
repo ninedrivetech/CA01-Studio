@@ -435,7 +435,7 @@ export default function Dashboard() {
         <span className="status-detail">{encodings.find(e => e.id === encoding)?.name} · {frames.length}{t(" 段 · 400 B 安全分段")}</span>
         <span className="status-theme">{t(themes.find(themeOption => themeOption.id === theme)?.name)}</span>
       </footer>
-      <DownloadDialog file={logDownload} onClose={() => setLogDownload(null)}/>
+      {logDownload && <DownloadDialog file={logDownload} onClose={() => setLogDownload(null)}/>}
       <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} status={state.status} disabled={disabled} configuringDisabled={configuringDisabled} version={state.version} special={special} setSpecial={setSpecial} theme={theme} setTheme={setTheme} motion={motion} setMotion={setMotion} run={run} feedback={settingsOpen ? feedback : null}/>
     </div>);
 }

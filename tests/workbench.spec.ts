@@ -14,8 +14,10 @@ test('单页参数保存、播放暂停继续与日志导出',async({page})=>{
   await expect(page.getByText(/1 \/ 1 段已完成/)).toBeVisible();
   await page.getByRole('button',{name:'导出日志'}).click();
   const download=page.waitForEvent('download');await page.getByRole('button',{name:'下载文件'}).click();expect((await download).suggestedFilename()).toBe('知了1号-通信.log');
-  await page.screenshot({path:'docs/screenshots/dashboard-amber.png'});
-  await page.getByRole('button',{name:'切换日夜主题'}).click();await page.screenshot({path:'docs/screenshots/dashboard-night.png',animations:'disabled'});
+  await expect(page.getByRole('status')).toContainText('已交给浏览器下载');
+  await page.getByRole('button',{name:'完成',exact:true}).click();
+  await page.screenshot({path:'test-results/screenshots/dashboard-amber.png'});
+  await page.getByRole('button',{name:'切换日夜主题'}).click();await page.screenshot({path:'test-results/screenshots/dashboard-night.png',animations:'disabled'});
   expect(errors).toEqual([]);
 });
 test('单页全部控制区在默认首屏内完整展示',async({page})=>{
@@ -35,7 +37,7 @@ test('单页全部控制区在默认首屏内完整展示',async({page})=>{
       await expect(page.getByRole('dialog')).not.toBeVisible();
   }
   await page.setViewportSize({width:375,height:812});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-  await page.screenshot({path:'docs/screenshots/dashboard-mobile.png',fullPage:true});
+  await page.screenshot({path:'test-results/screenshots/dashboard-mobile.png',fullPage:true});
 });
 test('长文本自然完成后再续段，停止取消剩余队列',async({page})=>{
   await connect(page);await page.getByRole('combobox',{name:'编码',exact:true}).selectOption('5');await page.getByLabel('播报文本',{exact:true}).fill('中'.repeat(350));
@@ -62,13 +64,13 @@ test('设置子窗口焦点、草稿保留、主题预览及小屏滚动',async(
   for(const [id,name] of [['amber','初鸣 / First Song'],['forest','林鸣 / Grove'],['night','夜鸣 / Nocturne'],['contrast','明翼 / Clearwing']]){
     await dialog.getByRole('button',{name,exact:true}).click();await expect(page.locator('html')).toHaveAttribute('data-theme',id);
     await expect(dialog.getByRole('button',{name,exact:true})).toHaveAttribute('aria-pressed','true');
-    await page.screenshot({path:`docs/screenshots/settings-${id}.png`,animations:'disabled'});
+    await page.screenshot({path:`test-results/screenshots/settings-${id}.png`,animations:'disabled'});
   }
   await dialog.getByRole('combobox',{name:'动态效果'}).selectOption('reduced');await expect(page.locator('html')).toHaveAttribute('data-motion','reduced');
   for(const viewport of [{width:375,height:812},{width:812,height:375}]){
     await page.setViewportSize(viewport);expect(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth+1)).toBe(true);
     await dialog.getByRole('button',{name:'初鸣 / First Song',exact:true}).click();await expect(dialog.getByRole('button',{name:'完成',exact:true})).toBeInViewport();
   }
-  await page.setViewportSize({width:375,height:812});await page.screenshot({path:'docs/screenshots/settings-mobile.png'});
+  await page.setViewportSize({width:375,height:812});await page.screenshot({path:'test-results/screenshots/settings-mobile.png'});
   await dialog.getByRole('button',{name:'完成',exact:true}).click();await expect(trigger).toBeFocused();
 });

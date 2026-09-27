@@ -1,6 +1,6 @@
 import { chromium, expect } from '@playwright/test';
 import { spawn } from 'node:child_process';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import net from 'node:net';
 
@@ -10,10 +10,11 @@ const server=net.createServer();
 await new Promise((resolve,reject)=>server.once('error',reject).listen(port,'127.0.0.1',resolve));
 await new Promise(resolve=>server.close(resolve));
 const report={runtime:'Tauri / WebView2',date:new Date().toISOString(),checks:[],hardwareTested:false};
-await mkdir('docs/screenshots',{recursive:true});
+await mkdir('test-results/native-smoke',{recursive:true});
 const app=spawn(path.resolve('src-tauri/target/release/zhiliao-studio.exe'),[],{windowsHide:true,stdio:'ignore',env:{...process.env,WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:`--remote-debugging-port=${port}`,WEBVIEW2_USER_DATA_FOLDER:path.resolve('test-results/native-profile')}});
 app.on('error',e=>{console.error(e);process.exitCode=1;});
 let browser;
+let exportedLog;
 try{
   for(let attempt=0;attempt<90;attempt++){
     if(app.exitCode!==null)throw new Error(`原生程序提前退出：${app.exitCode}`);
@@ -38,7 +39,7 @@ try{
     await page.getByRole('option',{name:/\(COM9\)/}).click();
     await page.getByRole('combobox',{name:'端口',exact:true}).click();
   }
-  await page.screenshot({path:'docs/screenshots/native-ports.png',animations:'disabled'});
+  await page.screenshot({path:'test-results/native-smoke/native-ports.png',animations:'disabled'});
   await page.keyboard.press('Escape');
   report.checks.push('Windows友好名称与自定义串口列表');
   const invalidFrame=await page.evaluate(async()=>{try{await window.__TAURI_INTERNALS__.invoke('send',{bytes:[0xfd,0,1,0x99]});return false;}catch{return true;}});
@@ -53,17 +54,26 @@ try{
   await page.getByRole('button',{name:'开始播报'}).click();
   await expect(page.getByText(/1 \/ 1 段已完成/)).toBeVisible();
   report.checks.push('原生窗口中的模拟连接、配置同步与播放完成');
-  const downloads = path.resolve('test-results/native-downloads');
-  await mkdir(downloads,{recursive:true});
-  const cdp = await context.newCDPSession(page);
-  await cdp.send('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:downloads,eventsEnabled:true});
+  const downloads = await page.evaluate(()=>window.__TAURI_INTERNALS__.invoke('log_export_directory'));
+  let browserDownloads = 0;
+  page.on('download',()=>browserDownloads++);
   await page.getByRole('button',{name:'导出日志',exact:true}).click();
-  await expect(page.getByRole('dialog',{name:'导出日志'})).toBeVisible();
-  await page.screenshot({path:'docs/screenshots/native-download.png'});
-  await page.getByRole('button',{name:'下载文件',exact:true}).click();
-  await expect.poll(async()=>{try{return await readFile(path.join(downloads,'知了1号-通信.log'),'utf8');}catch{return '';}}).toContain('FD 00 01 21');
-  report.checks.push('原生 WebView2 日志导出包含真实生成的收发报文');
-  await page.screenshot({path:'docs/screenshots/native-release.png'});
+  const exportDialog = page.getByRole('dialog',{name:'导出日志'});
+  await expect(exportDialog).toBeVisible();
+  await expect(exportDialog).toContainText(downloads);
+  const logName = `cicada-native-${Date.now()}`;
+  await exportDialog.getByLabel('文件名',{exact:true}).fill(logName);
+  await page.screenshot({path:'test-results/native-smoke/native-download.png'});
+  await exportDialog.getByRole('button',{name:'下载文件',exact:true}).click();
+  await expect(exportDialog.getByRole('status')).toContainText('文件已保存');
+  exportedLog = (await exportDialog.getByRole('status').locator('p').textContent()).trim();
+  if(path.dirname(exportedLog)!==downloads || path.basename(exportedLog)!==`${logName}.log`)throw new Error('导出路径不符合系统下载目录与指定文件名');
+  expect(await readFile(exportedLog,'utf8')).toContain('FD 00 01 21');
+  expect(browserDownloads).toBe(0);
+  await page.screenshot({path:'test-results/native-smoke/native-download-saved.png'});
+  await exportDialog.getByRole('button',{name:'完成',exact:true}).click();
+  report.checks.push('主题弹窗直接保存 UTF-8 日志到下载目录，无浏览器下载事件，显示实际路径');
+  await page.screenshot({path:'test-results/native-smoke/native-release.png'});
   await page.getByRole('button',{name:'最大化或还原'}).click();
   await expect.poll(()=>page.evaluate(()=>window.__TAURI_INTERNALS__.invoke('plugin:window|is_maximized',{label:'main'}))).toBe(true);
   await page.getByRole('button',{name:'最大化或还原'}).click();
@@ -76,12 +86,12 @@ try{
   await expect(about).toContainText('上海玖驱科技有限公司');
   await expect(about.getByRole('link',{name:'xiemaths@outlook.com'})).toHaveAttribute('href','mailto:xiemaths@outlook.com');
   report.checks.push('作者、公司和联系邮箱完整展示');
-  await page.screenshot({path:'docs/screenshots/native-settings.png',animations:'disabled'});
+  await page.screenshot({path:'test-results/native-smoke/native-settings.png',animations:'disabled'});
   report.checks.push('状态栏设置打开模态子窗口');
   await page.getByRole('combobox',{name:'界面语言',exact:true}).selectOption('en');
   await expect(page.getByRole('dialog',{name:'Settings',exact:true})).toBeVisible();
   await expect.poll(()=>page.evaluate(()=>window.__TAURI_INTERNALS__.invoke('plugin:window|title',{label:'main'}))).toBe('Cicada One · CICADA-1');
-  await page.screenshot({path:'docs/screenshots/native-settings-en.png',animations:'disabled'});
+  await page.screenshot({path:'test-results/native-smoke/native-settings-en.png',animations:'disabled'});
   await page.getByRole('combobox',{name:'Interface language',exact:true}).selectOption('zh');
   report.checks.push('中英文设置、原生窗口标题同步，串口会话保持');
   await page.getByRole('button',{name:'读取版本并断开',exact:true}).click();
@@ -100,9 +110,10 @@ try{
   await page.getByRole('button',{name:'关闭',exact:true}).click();
   await expect.poll(()=>app.exitCode,{timeout:7000}).not.toBeNull();
   report.checks.push('原生关闭按钮退出进程');
-  await writeFile('docs/screenshots/native-report.json',JSON.stringify(report,null,2));
+  await writeFile('test-results/native-smoke/native-report.json',JSON.stringify(report,null,2));
   console.log(JSON.stringify(report,null,2));
 }finally{
+  if(exportedLog)await unlink(exportedLog).catch(()=>{});
   if(browser)await browser.close().catch(()=>{});
   if(app.exitCode===null)app.kill();
 }
