@@ -1,62 +1,97 @@
-# 知了1号 · CICADA-1
+<p align="center">
+  <img src="docs/assets/cicada-logo.svg" alt="CICADA-1 logo" width="152" height="152">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="docs/assets/ninedrive-logo.jpg" alt="玖驱科技 · NINEDRIVE TECH SHANGHAI" width="152" height="152">
+</p>
 
-作者：**Mzee** · 联系邮箱：**xiemaths@outlook.com**
+<h1 align="center">知了1号 · CICADA-1</h1>
 
-公司：**上海玖驱科技有限公司**
+<p align="center">
+  <a href="README.md"><img src="https://img.shields.io/badge/语言-简体中文-22314E?style=for-the-badge" alt="简体中文"></a>
+  <a href="docs/README.en.md"><img src="https://img.shields.io/badge/Language-English-3776AB?style=for-the-badge" alt="English documentation"></a>
+  <a href="docs/README.fr.md"><img src="https://img.shields.io/badge/Langue-Français-0055A4?style=for-the-badge" alt="Documentation française"></a>
+</p>
 
-参考 `D:\Desktop\df01-studio` 的 Tauri 2 + Rust + React/TypeScript 架构，构建知了1号语音合成模块工作台。英文代号 **CICADA-1**，取自知了的英文 cicada。支持简体中文与English界面；首页集中展示连接、文本与提示音、语音参数、日志和发送预览，顶部状态栏的齿轮图标打开设置子窗口。
+<p align="center">
+  面向知了1号语音合成模块的开源串口工作台
+</p>
 
-## 启动
+<p align="center">
+  <a href="https://v2.tauri.app/"><img src="https://img.shields.io/badge/Tauri-2-24C8D8?style=flat-square&amp;logo=tauri&amp;logoColor=white" alt="Tauri 2"></a>
+  <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/Rust-000000?style=flat-square&amp;logo=rust&amp;logoColor=white" alt="Rust"></a>
+  <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-19-149ECA?style=flat-square&amp;logo=react&amp;logoColor=white" alt="React 19"></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.8-3178C6?style=flat-square&amp;logo=typescript&amp;logoColor=white" alt="TypeScript 5.8"></a>
+</p>
 
-需要 Node.js 20+、Rust stable、Windows C++ Build Tools 与 WebView2。
+<p align="center">
+  <img src="https://img.shields.io/badge/Version-1.0.0-22314E?style=flat-square" alt="Version 1.0.0">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-blue?style=flat-square&amp;logo=apache&amp;logoColor=white" alt="Apache License 2.0"></a>
+</p>
 
-```powershell
-npm install
-npm run desktop
-```
-
-只预览界面与模拟协议：`npm run dev`，访问 http://127.0.0.1:1430 。浏览器不访问真实串口；模拟器不合成声音，真实声音由知了1号模块及其扬声器输出。
-
-Windows 便携程序位于 `release/zhiliao-1.0.0-windows-x64-portable.zip`，解压后运行 `zhiliao-studio.exe`，需要系统安装 WebView2。使用步骤见 [使用指南](docs/USER_GUIDE.md)。
-
-重新发布：`npm run bundle` → `npm run test:native` → `npm run notices` → `npm run package:portable`（打包脚本需要 PowerShell 7）。当前提供免安装便携包，不生成安装器；原始发布程序位于 `src-tauri/target/release/zhiliao-studio.exe`。
+知了1号（CICADA-1）通过 UART 连接语音合成模块，让你在一个窗口里编辑播报文本、配置声音、插入提示音，并查看原始通信报文。桌面端使用 Tauri、Rust 与 React/TypeScript，声音由模块及其扬声器输出。
 
 ## 功能
 
-- 串口选择器显示系统设备名称，例如USB-SERIAL CH340 (COM9)，支持名称/端口搜索、键盘选择、手动输入端口。9600/57600/115200/460800波特率，固定8N1无流控。
-- 顶部语言图标及设置中的界面语言选项切换中英文，记住本机偏好；菜单、状态、应用错误和日志说明同步翻译，播报文本、设备名称和HEX报文原样保留。
-- GB2312、GBK、UTF-16LE、UTF-16BE、UTF-8 编码与字节计数；统一采用400字节安全分段，尽量在句末分段，保护控制标记与提示音名称，收到上一段4F后才发送下一段。
-- 开始、暂停、继续、停止、状态查询；断开清除队列，超时断开并提示结果不确定。
-- 八种发音人、音量、语速、语调及八项中文读法设置；显式保存、读取确认、恢复默认。
-- 13种提示音插入、示例文本、UTF-8文本文件导入、草稿保存、控制标记示例。
-- 功放特殊延时设置和读取，有回传/无回传两种休眠与唤醒，版本原始响应采集。
-- 原始HEX收发记录、搜索与方向过滤、暂停显示、清空、日志下载、待发送帧预览。
-- 文本在后台线程编码与分段，快速改写时只接受最新结果；UTF-8 导入严格校验，失败保留草稿；草稿防抖保存并在页面关闭时写入最新值。
-- 分段进度条、可展开日志、筛选恢复入口与逐段报文预览；手机首页扩大点击区域，短窗口支持滚动。
-- 初鸣 / First Song、林鸣 / Grove、夜鸣 / Nocturne、明翼 / Clearwing 四主题，保留原有主题偏好；设置子窗口支持键盘焦点循环、Esc关闭及返回设置按钮，外观即时保存。
+- **串口连接**：设备名称与端口搜索、手动输入端口，支持 9600 / 57600 / 115200 / 460800 波特率。
+- **文本播报**：GB2312、GBK、UTF-16LE、UTF-16BE、UTF-8 编码，自动分段与连续播放，支持暂停、继续和停止。
+- **声音配置**：八种发音人、音量、语速、语调及中文读法设置，保存、读取和恢复默认参数。
+- **文本工具**：13 种内置提示音、控制标记、UTF-8 文本导入和本机草稿保存。
+- **通信记录**：HEX 收发记录、搜索、方向筛选、日志导出和逐段报文预览。
+- **设备与外观**：功放延时、休眠、唤醒、版本响应读取，四种主题及中英文应用界面。
 
-## 验证
+<p align="center"><img src="docs/screenshots/dashboard-night.png" alt="知了1号工作台：文本编辑、声音参数和通信记录" width="960"></p>
+
+## 四种主题
+
+初鸣、林鸣、夜鸣、明翼，分别呈现暖白、浅绿、深青与高对比配色。在设置中切换主题，偏好自动保存。
+
+<p align="center">
+  <a href="docs/screenshots/themes-overview.png"><img src="docs/screenshots/themes-overview.png" alt="四主题对照：初鸣、林鸣、夜鸣、明翼" width="1200"></a>
+</p>
+
+## 快速开始
+
+### 环境
+
+桌面使用环境为 Windows 10/11。准备 Node.js 20 或更新的 LTS 版本、Rust stable（MSVC 工具链）、Microsoft C++ Build Tools（含“使用 C++ 的桌面开发”组件及 Windows SDK），以及 Microsoft Edge WebView2 Runtime。Tauri 的依赖安装说明见[官方环境指南](https://v2.tauri.app/start/prerequisites/)。
+
+### 从源码启动
+
+在项目根目录运行：
 
 ```powershell
-npm test
-npm run build
-npm run test:e2e
-cargo test --manifest-path src-tauri/Cargo.toml
-cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+npm ci
+npm run desktop
 ```
 
-协议依据、型号专属限制与文档冲突处理见 [docs/PROTOCOL.md](docs/PROTOCOL.md)。浏览器流程测试默认使用 Microsoft Edge，截图写入 `docs/screenshots/`。
+仅浏览界面时可运行：
 
-已执行的软件验证结果见 [验证记录](docs/VERIFICATION.md)，实际模块验收见 [实机验收表](docs/ACCEPTANCE.md)。原生测试使用隔离 WebView2 配置目录及固定本地调试端口9236，验证后关闭其自行启动的进程。
+```powershell
+npm run dev
+```
 
-## 目录
+打开 <http://127.0.0.1:1430> 并选择模拟设备。浏览器模式不访问真实串口，也不合成声音。
 
-`src/lib/device.ts` 会话状态、队列、模拟器；`src-tauri/src/main.rs` 原生串口及帧校验；`src/Dashboard.tsx` 首页工作台；`src/components/SettingsDialog.tsx` 设置子窗口；`tests/` 浏览器工作流测试。
+### 连接并播报
 
-`src/lib/protocolCore.ts` 为轻量帧定义与回传解析，`src/lib/protocol.ts` 负责文字编码与安全分段，`src/lib/speech.worker.ts` 在后台处理文本。设置中的“关于”区域展示作者与公司信息。
+1. 将 USB 转 UART 的 TX 接模块 RX、RX 接模块 TX，并连接 GND；按模块要求供电并连接扬声器。
+2. 选择实际串口及与 BAUD0/BAUD1 引脚配置一致的波特率，点击连接。
+3. 输入文本、选择编码，确认字节数和分段预览后点击“开始播报”。
+4. 在“语音参数”调整声音，点击保存写入模块；在通信记录中查看收发内容。
 
-## 使用边界
+UART 电平必须与模块匹配。软件选择波特率只配置主机串口，不会改变模块引脚配置。模块支持中文字库和英文字母，不提供英文单词语音合成；表情等补充平面字符不能发送。
 
-电脑的UART电平须与模块匹配，TX/RX交叉连接且共地。波特率由模块 BAUD0/BAUD1 引脚决定，软件选择不能替代硬件配置。模块支持中文字库及英文字母，不是英文单词语音引擎。不支持补充平面字符（如表情），软件会阻止发送。
+## 文档
 
-控制标记全局生效并掉电保存；[d]不恢复发音人，[d][m3]才恢复全部默认。COM9已执行真实协议测试，报告见docs目录；模拟器不替代实际硬件的音色、串口电气及时序验收。实听效果仍需人工确认。
+| 文档 | 内容 |
+| --- | --- |
+| [使用指南](docs/USER_GUIDE.md) | 接线、连接、播报、声音设置、提示音、日志及常见问题 |
+| [通信协议](docs/PROTOCOL.md) | UART 参数、帧结构、命令、回传、编码及控制标记 |
+
+每段文本最多 **400 字节**，工作台收到上一段的 `4F` 完成回传后才发送下一段。文本中的控制标记会全局生效并掉电保存；恢复全部默认参数使用 `[d][m3]`。
+
+README 提供[中文](README.md)、[English](docs/README.en.md) 和 [Français](docs/README.fr.md) 三种版本；详细指南与协议为中文，应用界面支持中文和英文。
+
+## 许可证
+
+本项目采用 [Apache License 2.0](LICENSE)。第三方组件的许可证与声明见 [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt)。

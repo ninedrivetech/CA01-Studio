@@ -1,6 +1,7 @@
 [package]
 name = "zhiliao-studio"
 version = "1.0.0"
+license = "Apache-2.0"
 description = "知了1号 TTS 模块工作台"
 authors = ["Mzee <xiemaths@outlook.com>"]
 edition = "2021"
