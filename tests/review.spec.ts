@@ -12,7 +12,7 @@ test('日志下载弹窗跟随四种主题，支持取消和空结果', async ({
     await expect(dialog).toBeVisible();
     colors.add(await dialog.evaluate(element => getComputedStyle(element).backgroundColor));
     await expect(dialog.getByText('知了1号-通信.log')).toBeVisible();
-    await page.screenshot({ path: `docs/screenshots/download-${theme}.png`, animations: 'disabled' });
+    await page.screenshot({ path: `test-results/screenshots/download-${theme}.png`, animations: 'disabled' });
     await page.keyboard.press('Escape');
     await expect(dialog).not.toBeVisible();
     await expect(trigger).toBeFocused();
@@ -104,7 +104,7 @@ test('日志空筛选可恢复，展开模式与播放进度可用', async ({ pa
   await expect(page.getByRole('button', { name: '收起日志' })).toHaveAttribute('aria-expanded', 'true');
   await page.getByRole('button', { name: '开始播报' }).click();
   await expect(page.getByRole('progressbar', { name: '播报进度' })).toHaveJSProperty('value', 1);
-  await page.screenshot({ path: 'docs/screenshots/optimized-logs.png', fullPage: true });
+  await page.screenshot({ path: 'test-results/screenshots/optimized-logs.png', fullPage: true });
 });
 
 test('关于信息完整展示，中英文与手机操作布局可用', async ({ page }) => {
@@ -115,7 +115,7 @@ test('关于信息完整展示，中英文与手机操作布局可用', async ({
   await expect(about).toContainText('上海玖驱科技有限公司');
   await expect(about.getByRole('link', { name: 'xiemaths@outlook.com' })).toHaveAttribute('href', 'mailto:xiemaths@outlook.com');
   await about.scrollIntoViewIfNeeded();
-  await page.screenshot({ path: 'docs/screenshots/optimized-about.png' });
+  await page.screenshot({ path: 'test-results/screenshots/optimized-about.png' });
   await page.getByRole('combobox', { name: '界面语言', exact: true }).selectOption('en');
   await expect(page.getByRole('region', { name: 'About', exact: true })).toContainText('Mzee');
   await page.getByRole('button', { name: 'Done', exact: true }).click();
@@ -124,7 +124,7 @@ test('关于信息完整展示，中英文与手机操作布局可用', async ({
   const small = await page.locator('.studio-main button, .header-actions button').evaluateAll(elements =>
     elements.filter(element => element.getBoundingClientRect().height < 44).map(element => element.getAttribute('aria-label') || element.textContent));
   expect(small).toEqual([]);
-  await page.screenshot({ path: 'docs/screenshots/optimized-mobile.png', fullPage: true });
+  await page.screenshot({ path: 'test-results/screenshots/optimized-mobile.png', fullPage: true });
 });
 
 test('文本校验提示与输入关联，日志暂停有可访问状态', async ({ page }) => {

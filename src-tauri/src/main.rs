@@ -5,6 +5,7 @@ use std::{
     time::{Duration, Instant},
 };
 use tauri::State;
+mod log_export;
 #[cfg(windows)]
 mod port_names;
 
@@ -233,7 +234,9 @@ fn main() {
             disconnect,
             send,
             receive,
-            capture_version
+            capture_version,
+            log_export::log_export_directory,
+            log_export::save_log_export
         ])
         .run(tauri::generate_context!())
         .expect("应用启动失败");

@@ -4,6 +4,20 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 
 export type Language = "zh" | "en";
 export const english: Record<string, string> = {
+  "文件名": "File name", "保存位置": "Save location", "正在获取下载目录…": "Loading download folder…",
+  "浏览器设置的下载目录": "Your browser's download folder", "重新获取保存位置": "Retry save location",
+  "直接保存到系统下载目录；重名文件会自动编号。": "Saved directly to Downloads. Duplicate names are numbered automatically.",
+  "内容预览（前 12 行）": "Preview (first 12 lines)", "日志内容预览": "Log content preview",
+  "正在保存…": "Saving…", "文件已保存": "File saved", "已交给浏览器下载": "Sent to browser downloads",
+  "请输入有效文件名（最多 80 个字符，不能包含路径或特殊符号）": "Enter a valid file name (up to 80 characters, without paths or special symbols).",
+  "无法获取下载目录，请检查系统设置后重试": "Cannot locate Downloads. Check your system settings and retry.",
+  "文件名无效，请使用不含路径的 .log 文件名": "Invalid file name. Use a .log file name without a path.",
+  "日志超过 8 MB，请缩小筛选范围后重试": "The log exceeds 8 MB. Narrow the filters and retry.",
+  "无法访问下载目录，请检查文件夹权限": "Cannot access Downloads. Check folder permissions.",
+  "无法保存日志，请检查下载目录权限和磁盘空间后重试": "Cannot save the log. Check Downloads permissions and free disk space, then retry.",
+  "日志写入失败，请检查磁盘空间后重试": "Could not write the log. Check free disk space and retry.",
+  "同名日志过多，请更换文件名后重试": "Too many logs have this name. Choose another file name.",
+  "日志保存任务未完成，请重试": "Log saving did not complete. Please retry.",
   "关闭下载弹窗": "Close download dialog", "取消": "Cancel", "下载文件": "Download file",
   "下载当前筛选结果，保存打开弹窗时的日志快照。": "Download the filtered logs captured when this dialog opened.",
   "当前没有可导出的日志，请调整筛选或连接设备后重试。": "No logs to export. Adjust the filters or connect a device and try again.",
