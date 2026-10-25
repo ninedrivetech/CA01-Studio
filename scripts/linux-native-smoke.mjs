@@ -171,10 +171,17 @@ try {
   throw error;
 } finally {
   for (const filename of exported) await unlink(filename);
-  if (session)
+  if (session) {
+    await execute(
+      "setTimeout(() => window.__TAURI_INTERNALS__.invoke('plugin:window|close', {label:'main'}), 100); return true;",
+    ).catch((error) => console.error(`App cleanup: ${error.message}`));
+    await delay(200);
     await request("DELETE", `/session/${session}`).catch((error) =>
       console.error(error.message),
     );
+  }
   driver.kill();
+  driver.stdout.destroy();
+  driver.stderr.destroy();
   await writeFile("test-results/linux-native/driver.log", driverOutput);
 }
