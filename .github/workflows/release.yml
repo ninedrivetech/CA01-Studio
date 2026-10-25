@@ -117,7 +117,53 @@ jobs:
           fi
       - name: Windows packaged app smoke test
         if: runner.os == 'Windows'
-        run: npm run test:native
+        env:
+          HTTP_PROXY: ""
+          HTTPS_PROXY: ""
+          ALL_PROXY: ""
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          $probeFile = Join-Path $env:RUNNER_TEMP 'cicada-native-probe.ps1'
+          $probeOutput = Join-Path $env:GITHUB_WORKSPACE 'test-results/native-startup-diagnostics.json'
+          $probeSource = @'
+          param([string]$OutputPath)
+          Start-Sleep -Seconds 5
+          $apps = @(Get-CimInstance Win32_Process -Filter "Name='zhiliao-studio.exe'")
+          $profile = Join-Path $env:GITHUB_WORKSPACE 'test-results\native-profile'
+          $webviews = @(Get-CimInstance Win32_Process -Filter "Name='msedgewebview2.exe'" |
+            Where-Object { $_.CommandLine -and $_.CommandLine.IndexOf($profile,[StringComparison]::OrdinalIgnoreCase) -ge 0 })
+          $browserIds = @($webviews | ForEach-Object ProcessId)
+          $listeners = @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
+            Where-Object { $_.OwningProcess -in $browserIds } |
+            Select-Object LocalAddress,LocalPort,OwningProcess)
+          $policies = @()
+          foreach ($key in @('HKLM:\SOFTWARE\Policies\Microsoft\Edge','HKCU:\SOFTWARE\Policies\Microsoft\Edge')) {
+            $values = Get-ItemProperty -LiteralPath $key -ErrorAction SilentlyContinue
+            $policies += [pscustomobject]@{
+              Key=$key
+              RemoteDebuggingAllowed=$values.RemoteDebuggingAllowed
+              DeveloperToolsAvailability=$values.DeveloperToolsAvailability
+            }
+          }
+          [ordered]@{
+            Apps=@($apps | Select-Object ProcessId,ParentProcessId,CommandLine)
+            WebViews=@($webviews | Select-Object ProcessId,ParentProcessId,CommandLine)
+            Listeners=$listeners
+            Policies=$policies
+          } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $OutputPath -Encoding utf8
+          '@
+          New-Item -ItemType Directory -Path test-results -Force | Out-Null
+          Set-Content -LiteralPath $probeFile -Value $probeSource -Encoding utf8
+          $probe = Start-Process pwsh -ArgumentList @('-NoProfile','-File',"`"$probeFile`"",'-OutputPath',"`"$probeOutput`"") -WindowStyle Hidden -PassThru
+          $nativeExit = 1
+          try {
+            npm run test:native
+            $nativeExit = $LASTEXITCODE
+          } finally {
+            if (-not $probe.WaitForExit(10000)) { Stop-Process -Id $probe.Id -Force }
+            if (Test-Path -LiteralPath $probeOutput) { Get-Content -LiteralPath $probeOutput }
+          }
+          exit $nativeExit
       - name: Linux packaged app smoke test
         if: runner.os == 'Linux'
         run: |
