@@ -77,6 +77,8 @@ Tauri 会在 Windows 上以 LF 序列化 `Cargo.toml`；仓库通过 `.gitattrib
 
 Windows 托管 runner 以管理员身份运行时，WebView2 会忽略环境变量中的浏览器参数。原生测试因此只对 `zhiliao-studio.exe` 临时设置 HKLM 的 `AdditionalBrowserArguments`，在本机调试端口进行验证，测试结束后恢复原有值。发布程序没有内置调试端口。该行为见 [Microsoft 的高权限 WebView2 说明](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/security#for-an-elevated-host-app-use-appropriate-override-flags)。
 
+Linux 原生脚本会等待控件可用，避免设备同步与后台编码完成时间不同造成抢先点击。云端脚本从工作流自身的固定提交读取到 runner 临时目录，报告记录 `harnessCommit`；应用和安装包仍绑定发布标签的源码，测试脚本不会改动构建工作树。
+
 在仓库中手动触发：
 
 ```sh

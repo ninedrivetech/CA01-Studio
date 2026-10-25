@@ -25,6 +25,8 @@
 | 发布校验未要求三端完整 | 发布门禁检查 Windows/Linux/macOS 必需产物、版本、提交及来源；8 项测试覆盖损坏、缺文件、错误来源与脏工作树 |
 | Windows 与 WSL 并行测试可能复用同一 localhost 服务 | 为测试分别使用 1431/1432 端口，关闭已有服务复用，并保留失败 trace |
 | Windows 云端因 Tauri 重写 Cargo.toml 换行而误触发源码门禁 | 通过独立 CRLF 检出复现：Tauri 将文件写为 LF，Git status 为 M 而 diff 为空；为该文件固定 LF，并令云端 Windows 使用 LF 检出，保留源码内容与哈希校验 |
+| 高权限 Windows runner 忽略 WebView2 调试环境变量 | 进程诊断证实调试参数缺失；按 Microsoft 的高权限宿主说明，仅为本应用临时设置 HKLM 浏览器参数并在测试后恢复，全部原生检查通过 |
+| Linux 原生脚本在后台编码完成前点击禁用按钮 | WebDriver 点击前轮询控件可用状态，保留点击和结果断言；测试脚本从工作流固定提交读取，报告记录来源 |
 
 ## 验证方式
 

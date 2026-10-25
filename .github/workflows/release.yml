@@ -190,9 +190,13 @@ jobs:
           exit $nativeExit
       - name: Linux packaged app smoke test
         if: runner.os == 'Linux'
+        env:
+          CICADA_TEST_HARNESS_SHA: ${{ github.workflow_sha }}
         run: |
           cargo install tauri-driver --locked --version 2.1.0
-          xvfb-run -a dbus-run-session -- node scripts/linux-native-smoke.mjs
+          native_harness="$RUNNER_TEMP/cicada-linux-native-smoke.mjs"
+          git show "${CICADA_TEST_HARNESS_SHA}:scripts/linux-native-smoke.mjs" > "$native_harness"
+          xvfb-run -a dbus-run-session -- node "$native_harness"
       - run: npm run package:release
       - name: Record build provenance
         run: node scripts/build-provenance.mjs
