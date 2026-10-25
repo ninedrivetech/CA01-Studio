@@ -1,2 +1,5 @@
 # Upstream license texts are preserved verbatim, including their whitespace.
 THIRD-PARTY-NOTICES.txt -whitespace
+
+# Tauri rewrites this manifest with LF even on Windows.
+src-tauri/Cargo.toml text eol=lf

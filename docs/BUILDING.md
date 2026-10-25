@@ -67,6 +67,8 @@ node scripts/build-provenance.mjs
 
 正式打包要求工作树干净：先完成测试并 commit，再运行上述构建脚本。脚本会在成功构建后记录源码提交、版本和输入文件哈希；打包时检查记录，拒绝使用旧二进制或未提交源码。`build.json` 也计入发布校验和。
 
+Tauri 会在 Windows 上以 LF 序列化 `Cargo.toml`；仓库通过 `.gitattributes` 固定该文件使用 LF，云端 Windows 也使用 LF 检出，避免仅由 CRLF → LF 转换触发源码状态门禁。该门禁仍拒绝真实内容变化。
+
 ## GitHub Actions
 
 [发布工作流](../.github/workflows/release.yml)支持推送 `v*` 标签和手动触发。标签必须等于 `package.json` 与 Tauri 的版本，且构建提交必须与标签一致。
