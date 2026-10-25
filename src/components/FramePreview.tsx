@@ -19,7 +19,7 @@ export function FramePreview({ frames, preparing }: { frames: number[][]; prepar
           onClick={() => setSelected(index + 1)}><ChevronRight size={14} /></button>
       </div>
     </div>
-    <pre>{current ? hex(current) : t(preparing ? '正在准备文本…' : '无可发送报文')}</pre>
+    <pre tabIndex={0} aria-label={t('发送预览')}>{current ? hex(current) : t(preparing ? '正在准备文本…' : '无可发送报文')}</pre>
     <div className="card-foot">{current ? `${current.length - 5} B · ` : ''}{t('FD 帧头 · 大端长度 · 01 合成 · 编码 + 文本')}</div>
   </section>;
 }

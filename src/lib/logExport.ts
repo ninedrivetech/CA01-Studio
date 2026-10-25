@@ -2,6 +2,8 @@ import { invoke, isTauri } from "@tauri-apps/api/core";
 
 export function logFilename(value: string): string {
     const stem = value.trim().replace(/\.log$/i, "");
+    if (new TextEncoder().encode(stem).length > 240)
+        throw new Error("文件名过长，请缩短至 240 个 UTF-8 字节以内");
     if (!stem || [...stem].length > 80 || /[<>:"/\\|?*\u0000-\u001f\u007f-\u009f]/.test(stem)
         || /[. ]$/.test(stem) || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(stem)) {
         throw new Error("请输入有效文件名（最多 80 个字符，不能包含路径或特殊符号）");

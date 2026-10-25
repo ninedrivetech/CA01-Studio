@@ -136,6 +136,23 @@ describe("串口会话边界", () => {
     await connect();
     transport.writeError = true;
     await expect(device.control(2)).rejects.toThrow("USB 已拔出");
+    expect(device.snapshot().connected).toBe(false);
+    expect(device.snapshot().status).toBe("未连接");
+  });
+  it("播放中停止写入失败会关闭会话，重连不重放旧队列", async () => {
+    await connect();
+    const play = device.speak(speechFrames("中".repeat(350), 5));
+    await vi.advanceTimersByTimeAsync(100);
+    await play;
+    transport.writeError = true;
+    await expect(device.control(2)).rejects.toThrow("USB 已拔出");
+    expect(device.snapshot().connected).toBe(false);
+    expect(device.snapshot().totalSegments).toBe(0);
+    transport.writeError = false;
+    await connect();
+    transport.rx.push([0x4f]);
+    await vi.advanceTimersByTimeAsync(200);
+    expect(transport.writes.filter(f => f[3] === 1)).toHaveLength(1);
   });
   it("分段间查询占用响应通道时续段等待，不丢失队列", async () => {
     await connect();

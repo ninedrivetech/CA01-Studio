@@ -4,6 +4,9 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 
 export type Language = "zh" | "en";
 export const english: Record<string, string> = {
+  "导入期间文本已修改，已保留当前草稿，请重新导入": "Text changed during import. Your current draft was kept; import again to replace it.",
+  "文件名过长，请缩短至 240 个 UTF-8 字节以内": "File name is too long. Shorten it to at most 240 UTF-8 bytes.",
+  "版本采集中，请等待断开后重新连接": "Version capture is in progress. Wait for disconnection, then reconnect.",
   "文件名": "File name", "保存位置": "Save location", "正在获取下载目录…": "Loading download folder…",
   "浏览器设置的下载目录": "Your browser's download folder", "重新获取保存位置": "Retry save location",
   "直接保存到系统下载目录；重名文件会自动编号。": "Saved directly to Downloads. Duplicate names are numbered automatically.",

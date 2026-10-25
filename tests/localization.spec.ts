@@ -26,7 +26,7 @@ test('完整英文界面、运行状态和日志，切换保留草稿与设备�
     return found;
   });
   expect(untranslated).toEqual([]);
-  await page.screenshot({ path: 'docs/screenshots/dashboard-en.png', animations: 'disabled' });
+  await page.screenshot({ path: 'test-results/screenshots/dashboard-en.png', animations: 'disabled' });
   for (const viewport of [{ width: 1100, height: 760 }, { width: 375, height: 812 }]) {
     await page.setViewportSize(viewport);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -43,7 +43,7 @@ test('完整英文界面、运行状态和日志，切换保留草稿与设备�
   await dialog.getByRole('button', { name: 'Save delays', exact: true }).click();
   await expect(dialog.getByRole('status')).toContainText('Delays saved and read back');
   await dialog.getByRole('button', { name: 'Dismiss notification' }).click();
-  await page.screenshot({ path: 'docs/screenshots/settings-en.png', animations: 'disabled' });
+  await page.screenshot({ path: 'test-results/screenshots/settings-en.png', animations: 'disabled' });
   await dialog.getByRole('combobox', { name: 'Interface language', exact: true }).selectOption('zh');
   await page.getByRole('button', { name: '完成', exact: true }).click();
   await expect(page.getByLabel('播报文本', { exact: true })).toHaveValue(text);
@@ -64,6 +64,10 @@ test('完整串口名称、搜索、键盘选择与手动串口', async ({ page 
   const port = page.getByRole('combobox', { name: '端口', exact: true });
   await expect(port).toContainText('USB-SERIAL CH340 (COM9)');
   await port.click();
+  const search = page.getByRole('combobox', { name: '搜索串口设备', exact: true });
+  await expect(search).toBeFocused();
+  await expect(search).toHaveAttribute('aria-expanded', 'true');
+  await expect(search).toHaveAttribute('aria-autocomplete', 'list');
   await expect(page.getByRole('option', { name: /USB Serial Device \(COM12\)/ })).toBeVisible();
   await page.getByLabel('搜索串口设备').fill('COM12');
   await page.getByLabel('搜索串口设备').press('Enter');

@@ -276,6 +276,7 @@ export class Device {
       } else await invoke("send", { bytes });
     } catch (e) {
       this.rejectPending(new Error(String(e)));
+      await this.disconnect();
     }
     const result = await settled;
     if ("error" in result) throw result.error;

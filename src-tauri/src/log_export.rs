@@ -7,9 +7,11 @@ use std::{
 use tauri::Manager;
 
 fn download_directory(app: &tauri::AppHandle) -> Result<PathBuf, String> {
-    app.path()
-        .download_dir()
-        .map_err(|_| "无法获取下载目录，请检查系统设置后重试".into())
+    let directory = app.path().download_dir();
+    // Minimal Linux desktops and WSL may not have xdg-user-dirs configured.
+    #[cfg(target_os = "linux")]
+    let directory = directory.or_else(|_| app.path().home_dir().map(|home| home.join("Downloads")));
+    directory.map_err(|_| "无法获取下载目录，请检查系统设置后重试".into())
 }
 
 #[tauri::command]
@@ -34,6 +36,7 @@ fn valid_filename(filename: &str) -> bool {
         });
     !stem.is_empty()
         && stem.chars().count() <= 80
+        && stem.len() <= 240
         && !stem.ends_with(['.', ' '])
         && !reserved
         && !stem
@@ -114,6 +117,9 @@ mod tests {
         }
         assert!(valid_filename("通信记录-01.log"));
         assert!(!valid_filename(&format!("{}.log", "中".repeat(81))));
+        assert!(valid_filename(&format!("{}.log", "中".repeat(80))));
+        assert!(valid_filename(&format!("{}.log", "😀".repeat(60))));
+        assert!(!valid_filename(&format!("{}.log", "😀".repeat(61))));
     }
 
     #[test]
