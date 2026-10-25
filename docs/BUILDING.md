@@ -75,6 +75,8 @@ Tauri 会在 Windows 上以 LF 序列化 `Cargo.toml`；仓库通过 `.gitattrib
 
 工作流在 Windows、Ubuntu 和 macOS 分别运行依赖审计、单元测试、浏览器测试、Rust 测试、fmt/Clippy 检查，再打包各平台产物；Windows 和 Linux 另运行打包程序原生冒烟。所有构建成功后，发布任务下载并验证 SHA-256，才上传到 Release。任意平台失败都会阻止自动发布。
 
+Windows 托管 runner 以管理员身份运行时，WebView2 会忽略环境变量中的浏览器参数。原生测试因此只对 `zhiliao-studio.exe` 临时设置 HKLM 的 `AdditionalBrowserArguments`，在本机调试端口进行验证，测试结束后恢复原有值。发布程序没有内置调试端口。该行为见 [Microsoft 的高权限 WebView2 说明](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/security#for-an-elevated-host-app-use-appropriate-override-flags)。
+
 在仓库中手动触发：
 
 ```sh
