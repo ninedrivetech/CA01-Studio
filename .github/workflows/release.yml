@@ -59,6 +59,9 @@ jobs:
       RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
       CARGO_INCREMENTAL: "0"
     steps:
+      - name: Configure Windows Git line endings
+        if: runner.os == 'Windows'
+        run: git config --global core.autocrlf true
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ needs.source.outputs.sha }}
@@ -73,6 +76,7 @@ jobs:
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
         with:
           workspaces: src-tauri
+          cache-on-failure: true
       - name: Linux build dependencies
         if: runner.os == 'Linux'
         run: |
@@ -95,7 +99,20 @@ jobs:
         run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - name: Build installers
-        run: node scripts/build-desktop.mjs --bundles ${{ matrix.bundles }} --ci
+        shell: bash
+        run: |
+          echo "Source state before build:"
+          git status --porcelain
+          if node scripts/build-desktop.mjs --bundles ${{ matrix.bundles }} --ci; then
+            exit 0
+          else
+            build_status=$?
+            echo "Source state after failed build:"
+            git status --porcelain
+            git diff --stat
+            git diff -- src-tauri/Cargo.toml
+            exit "$build_status"
+          fi
       - name: Windows packaged app smoke test
         if: runner.os == 'Windows'
         run: npm run test:native
