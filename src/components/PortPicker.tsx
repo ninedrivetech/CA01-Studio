@@ -49,7 +49,7 @@ export function PortPicker({ ports, value, onChange, disabled }: {
       <Usb size={15} /><span>{label}</span><ChevronDown size={14} />
     </button>
     {open && <div className="port-popup">
-      <div className="port-search"><Search size={15} /><input ref={search} aria-label={t("搜索串口设备")}
+      <div className="port-search"><Search size={15} /><input ref={search} role="combobox" aria-expanded="true" aria-autocomplete="list" aria-label={t("搜索串口设备")}
         placeholder={t("搜索设备名称或 COM 口")} value={query} aria-controls="port-options"
         aria-activedescendant={filtered[active] ? `port-option-${active}` : undefined}
         onChange={event => { setQuery(event.target.value); setActive(0); }} onKeyDown={event => {

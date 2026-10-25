@@ -50,7 +50,7 @@ First Song, Grove, Nocturne et Clearwing proposent des palettes blanc chaud, ver
 
 ### Prérequis
 
-Les instructions de bureau concernent Windows 10/11. Installez Node.js 20 ou une version LTS plus récente, Rust stable avec la chaîne d’outils MSVC, Microsoft C++ Build Tools avec la charge de travail **Développement Desktop en C++** et le SDK Windows, ainsi que Microsoft Edge WebView2 Runtime. Consultez les [prérequis de Tauri](https://v2.tauri.app/start/prerequisites/) pour les détails d’installation.
+Les installateurs et versions portables Windows 10/11, Linux et macOS sont disponibles dans les [Releases](https://github.com/ninedrivetech/CA01-Studio/releases). La compilation nécessite Node.js 22.12 ou une version LTS plus récente et Rust stable. Windows nécessite aussi les outils MSVC, le SDK Windows et WebView2 ; Linux nécessite GTK 3, WebKitGTK 4.1 et libudev ; macOS nécessite Xcode Command Line Tools. Consultez le [guide de compilation et publication (en chinois)](BUILDING.md) et les [prérequis de Tauri](https://v2.tauri.app/start/prerequisites/).
 
 ### Démarrer depuis les sources
 

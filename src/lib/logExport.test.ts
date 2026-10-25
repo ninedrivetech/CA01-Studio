@@ -5,7 +5,9 @@ import { logFilename, logExportDirectory, saveLogExport } from './logExport';
 
 it('normalizes log names and rejects paths and Windows device names', () => {
     expect(logFilename(' 通信.LOG ')).toBe('通信.log');
-    expect(logFilename('😀'.repeat(80))).toBe('😀'.repeat(80) + '.log');
+    expect(logFilename('😀'.repeat(60))).toBe('😀'.repeat(60) + '.log');
+    expect(logFilename('中'.repeat(80))).toBe('中'.repeat(80) + '.log');
+    expect(() => logFilename('😀'.repeat(61))).toThrow('240');
     for (const name of ['', '../x', 'C:\\x', 'CON', 'aux.txt', 'COM9', 'LPT1', 'a.', 'a .log', 'a\n.log', 'a\u0085', '中'.repeat(81)]) {
         expect(() => logFilename(name), name).toThrow();
     }

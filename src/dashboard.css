@@ -10,8 +10,10 @@
   --soft: #f5eadb;
   --wing: #d5e5cc;
   --danger: #a02c2c;
+  color-scheme: light;
 }
 [data-theme="forest"] {
+  color-scheme: light;
   --surface: #f7fbf4;
   --canvas: #e9efe3;
   --ink: #24362c;
@@ -24,6 +26,7 @@
   --danger: #a02c2c;
 }
 [data-theme="night"] {
+  color-scheme: dark;
   --surface: #142c31;
   --canvas: #0d2227;
   --ink: #e3eee8;
@@ -36,6 +39,7 @@
   --danger: #ffb5ad;
 }
 [data-theme="contrast"] {
+  color-scheme: dark;
   --surface: #101713;
   --canvas: #080e0b;
   --ink: #fff;
@@ -82,13 +86,22 @@ button {
     background-color 0.18s,
     border-color 0.18s;
 }
-button:hover {
+button:hover:not(:disabled) {
+  background: var(--soft);
+  border-color: var(--accent);
+}
+button:active:not(:disabled) {
   background: var(--soft);
   border-color: var(--accent);
 }
 button:disabled {
   opacity: 0.43;
   cursor: not-allowed;
+}
+input:disabled,
+select:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 button.primary {
   background: var(--accent);
@@ -288,6 +301,10 @@ pre {
   font-size: 12px;
   font-weight: 600;
   color: var(--accent);
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--soft);
 }
 .dashboard-grid {
   display: grid;
@@ -362,6 +379,10 @@ pre {
   background: color-mix(in srgb, var(--canvas) 35%, var(--surface));
   font-size: 17px;
   line-height: 1.8;
+}
+.speech-panel textarea::selection {
+  background: var(--accent);
+  color: var(--accent-text);
 }
 .text-meta {
   display: flex;

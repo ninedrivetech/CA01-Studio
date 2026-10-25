@@ -78,7 +78,7 @@ export default function Dashboard() {
     const [theme, setTheme] = useState(initial("zhiliao.theme", "amber"));
     const [text, setText] = useState(initial("zhiliao.draft", examples[0][1]));
     const [encoding, setEncoding] = useState(1);
-    const [port, setPort] = useState(initial("zhiliao.port", "COM9"));
+    const [port, setPort] = useState(initial("zhiliao.port", navigator.platform.startsWith("Win") ? "COM9" : ""));
     const [ports, setPorts] = useState<PortInfo[]>([]);
     const [baud, setBaud] = useState(115200);
     const [simulated, setSimulated] = useState(!isTauri());
@@ -116,6 +116,7 @@ export default function Dashboard() {
         try {
             const p = await device.ports();
             setPorts(p.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })));
+            setPort(current => current || p[0]?.name || "");
         }
         catch (e) {
             setError(String(e));
@@ -324,7 +325,11 @@ export default function Dashboard() {
             const f = e.target.files?.[0];
             if (f)
                 void run(async () => {
-                    setText(await readTextFile(f));
+                    const previousDraft = draft.current;
+                    const imported = await readTextFile(f);
+                    if (draft.current !== previousDraft)
+                        throw new Error("导入期间文本已修改，已保留当前草稿，请重新导入");
+                    setText(imported);
                 });
             e.target.value = "";
         }}/>
@@ -359,18 +364,18 @@ export default function Dashboard() {
               </span>
             </div>
             <div className="voice-form">
-              <label className="voice-picker">{t(" 发音人 ")}<select value={voice} onChange={(e) => setVoice(Number(e.target.value))}>
+              <label className="voice-picker">{t(" 发音人 ")}<select disabled={pending || state.busy} value={voice} onChange={(e) => setVoice(Number(e.target.value))}>
                   {voices.map(([id, name]) => <option key={id} value={id}>{t(name)}</option>)}
                 </select>
               </label>
               <div className="sliders">
                 {[["音量", volume, setVolume, 0, 10], ["语速", speed, setSpeed, 1, 30], ["语调", pitch, setPitch, 1, 10]].map(([name, value, set, min, max]) => <label key={String(name)}>
                   <span>{t(String(name))}<strong>{Number(value)}<small> / {Number(max)}</small></strong></span>
-                  <input type="range" min={Number(min)} max={Number(max)} value={Number(value)} onChange={event => (set as (n: number) => void)(Number(event.target.value))} />
+                  <input disabled={pending || state.busy} type="range" min={Number(min)} max={Number(max)} value={Number(value)} onChange={event => (set as (n: number) => void)(Number(event.target.value))} />
                 </label>)}
               </div>
               <div className="option-grid">
-                {strategies.map(([key, label, values]) => <label key={key}>{t(label)}<select value={options[key]} onChange={event => setOptions({ ...options, [key]: Number(event.target.value) })}>
+                {strategies.map(([key, label, values]) => <label key={key}>{t(label)}<select disabled={pending || state.busy} value={options[key]} onChange={event => setOptions({ ...options, [key]: Number(event.target.value) })}>
                   {values.map((value, i) => <option key={i} value={i}>{t(value)}</option>)}</select></label>)}
               </div>
             </div>
@@ -436,6 +441,6 @@ export default function Dashboard() {
         <span className="status-theme">{t(themes.find(themeOption => themeOption.id === theme)?.name)}</span>
       </footer>
       {logDownload && <DownloadDialog file={logDownload} onClose={() => setLogDownload(null)}/>}
-      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} status={state.status} disabled={disabled} configuringDisabled={configuringDisabled} version={state.version} special={special} setSpecial={setSpecial} theme={theme} setTheme={setTheme} motion={motion} setMotion={setMotion} run={run} feedback={settingsOpen ? feedback : null}/>
+      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} status={state.status} disabled={disabled} editingDisabled={pending || state.busy} configuringDisabled={configuringDisabled} version={state.version} special={special} setSpecial={setSpecial} theme={theme} setTheme={setTheme} motion={motion} setMotion={setMotion} run={run} feedback={settingsOpen ? feedback : null}/>
     </div>);
 }

@@ -15,6 +15,7 @@ interface Props {
     onClose: () => void;
     status: string;
     disabled: boolean;
+    editingDisabled: boolean;
     configuringDisabled: boolean;
     version: number[] | null;
     special: string[];
@@ -28,7 +29,7 @@ interface Props {
 }
 export function SettingsDialog(props: Props) {
     const { t, language, setLanguage } = useI18n();
-    const { open, onClose, status, disabled, configuringDisabled, version, special, setSpecial, theme, setTheme, motion, setMotion, run, feedback } = props;
+    const { open, onClose, status, disabled, editingDisabled, configuringDisabled, version, special, setSpecial, theme, setTheme, motion, setMotion, run, feedback } = props;
     const dialog = useRef<HTMLDialogElement>(null);
     useEffect(() => {
         const element = dialog.current!;
@@ -72,7 +73,7 @@ export function SettingsDialog(props: Props) {
           </div>
           <div className="section-caption"><span>{t("功放延时")}</span><small>{t("毫秒 / ms")}</small></div>
           <div className="delay-grid">
-            {["上电 POP", "句首丢音", "句尾 POP"].map((name, i) => <label key={name}>{t(name)}<input aria-label={t(`${name}延时`)} type="number" min={0} max={[200, 250, 300][i]} value={special[i]} onChange={event => setSpecial(special.map((v, j) => i === j ? event.target.value : v))} /><small>0–{[200, 250, 300][i]}</small></label>)}
+            {["上电 POP", "句首丢音", "句尾 POP"].map((name, i) => <label key={name}>{t(name)}<input disabled={editingDisabled} aria-label={t(`${name}延时`)} type="number" min={0} max={[200, 250, 300][i]} value={special[i]} onChange={event => setSpecial(special.map((v, j) => i === j ? event.target.value : v))} /><small>0–{[200, 250, 300][i]}</small></label>)}
           </div>
           <div className="delay-actions"><small>{t("休眠需 POPEN 高电平。")}</small><button disabled={configuringDisabled} onClick={() => void run(() => {
             if (special.some((v) => !v.trim()))

@@ -50,7 +50,7 @@
 
 ### 环境
 
-桌面使用环境为 Windows 10/11。准备 Node.js 20 或更新的 LTS 版本、Rust stable（MSVC 工具链）、Microsoft C++ Build Tools（含“使用 C++ 的桌面开发”组件及 Windows SDK），以及 Microsoft Edge WebView2 Runtime。Tauri 的依赖安装说明见[官方环境指南](https://v2.tauri.app/start/prerequisites/)。
+支持 Windows 10/11、Linux 和 macOS，安装包和便携包见 [Releases](https://github.com/ninedrivetech/CA01-Studio/releases)。源码构建需要 Node.js 22.12 或更新的 LTS 版本与 Rust stable。Windows 另需 Microsoft C++ Build Tools（MSVC、“使用 C++ 的桌面开发”及 Windows SDK）和 WebView2 Runtime；Linux 需要 WebKitGTK 4.1、GTK 3、libudev 及打包工具；macOS 需要 Xcode Command Line Tools。依赖安装与本地 WSL 构建步骤见[构建与发布](docs/BUILDING.md)，也可参考 [Tauri 官方环境指南](https://v2.tauri.app/start/prerequisites/)。
 
 ### 从源码启动
 

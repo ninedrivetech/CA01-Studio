@@ -1,5 +1,53 @@
 import { expect, test } from '@playwright/test';
 
+test('最小桌面窗口四主题控件完整，深色原生控件和减少动态效果生效', async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 640 });
+  await page.goto('/');
+  for (const theme of ['amber', 'forest', 'night', 'contrast']) {
+    await page.evaluate(value => localStorage.setItem('zhiliao.theme', value), theme);
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    expect(await page.locator('html').evaluate(element => getComputedStyle(element).colorScheme))
+      .toBe(['night', 'contrast'].includes(theme) ? 'dark' : 'light');
+    const clipped = await page.locator('.card button, .card select, .card textarea, .card-foot').evaluateAll(elements =>
+      elements.filter(element => {
+        const rect = element.getBoundingClientRect();
+        const card = element.closest('.card')!.getBoundingClientRect();
+        return rect.top < card.top || rect.bottom > card.bottom;
+      }).map(element => element.textContent));
+    expect(clipped).toEqual([]);
+  }
+  await page.locator('.preview pre').focus();
+  await expect(page.locator('.preview pre')).toBeFocused();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.getByRole('button', { name: '设置', exact: true }).click();
+  expect(await page.getByRole('dialog').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
+});
+
+test('导入等待期间保留新编辑，参数控件在请求期间锁定', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = File.prototype.arrayBuffer;
+    File.prototype.arrayBuffer = async function () {
+      await new Promise<void>(resolve => Object.assign(window, { finishImport: resolve }));
+      return original.call(this);
+    };
+  });
+  await page.goto('/');
+  const editor = page.getByLabel('播报文本', { exact: true });
+  await editor.fill('导入前草稿');
+  await page.getByLabel('导入文本', { exact: true }).setInputFiles({
+    name: 'delayed.txt', mimeType: 'text/plain', buffer: Buffer.from('文件中的文本'),
+  });
+  await expect(page.getByRole('combobox', { name: '发音人', exact: true })).toBeDisabled();
+  await expect(page.getByRole('slider').first()).toBeDisabled();
+  await editor.fill('读取期间的新编辑');
+  await page.evaluate(() => (window as unknown as { finishImport: () => void }).finishImport());
+  await expect(page.getByRole('alert')).toContainText('已保留当前草稿');
+  await expect(editor).toHaveValue('读取期间的新编辑');
+  await expect(page.getByRole('combobox', { name: '发音人', exact: true })).toBeEnabled();
+});
+
 test('日志下载弹窗跟随四种主题，支持取消和空结果', async ({ page }) => {
   await page.goto('/');
   const colors = new Set<string>();

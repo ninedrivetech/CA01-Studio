@@ -27,5 +27,24 @@
       "capabilities": ["main"]
     }
   },
-  "bundle": { "active": false }
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "publisher": "上海玖驱科技有限公司",
+    "homepage": "https://github.com/ninedrivetech/CA01-Studio",
+    "category": "Utility",
+    "shortDescription": "CICADA-1 serial speech workbench",
+    "longDescription": "An offline serial workbench for the CICADA-1 speech synthesis module, with text encoding, voice configuration and communication logs.",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
+    "resources": {
+      "../LICENSE": "LICENSE",
+      "../THIRD-PARTY-NOTICES.txt": "THIRD-PARTY-NOTICES.txt"
+    },
+    "windows": {
+      "nsis": {
+        "languages": ["SimpChinese", "English"],
+        "displayLanguageSelector": true
+      }
+    }
+  }
 }

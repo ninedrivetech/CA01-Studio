@@ -15,7 +15,7 @@ for(const [directory,entry] of Object.entries(lock.packages)) {
   const pkg=JSON.parse(await readFile(path.join(directory,'package.json'),'utf8'));
   await add(`${pkg.name}@${pkg.version}`,directory,pkg.license);
 }
-const metadata=JSON.parse(execFileSync('cargo',['metadata','--manifest-path','src-tauri/Cargo.toml','--format-version','1','--offline','--filter-platform','x86_64-pc-windows-msvc'],{encoding:'utf8',windowsHide:true,maxBuffer:20*1024*1024}));
+const metadata=JSON.parse(execFileSync('cargo',['metadata','--locked','--manifest-path','src-tauri/Cargo.toml','--format-version','1','--filter-platform','x86_64-pc-windows-msvc','--filter-platform','x86_64-unknown-linux-gnu','--filter-platform','aarch64-apple-darwin'],{encoding:'utf8',windowsHide:true,maxBuffer:20*1024*1024}));
 const resolved=new Set(metadata.resolve.nodes.map(n=>n.id));
 for(const pkg of metadata.packages) {
   if(!pkg.source || !resolved.has(pkg.id))continue;

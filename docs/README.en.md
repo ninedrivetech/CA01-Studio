@@ -50,7 +50,7 @@ First Song, Grove, Nocturne and Clearwing offer warm white, soft green, deep tea
 
 ### Requirements
 
-The desktop instructions target Windows 10/11. Install Node.js 20 or a newer LTS version, Rust stable with the MSVC toolchain, Microsoft C++ Build Tools with the **Desktop development with C++** workload and Windows SDK, and Microsoft Edge WebView2 Runtime. See the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for installation details.
+Windows 10/11, Linux and macOS installers and portable packages are available from [Releases](https://github.com/ninedrivetech/CA01-Studio/releases). Source builds require Node.js 22.12 or a newer LTS and Rust stable. Windows also needs MSVC Build Tools, the Windows SDK and WebView2; Linux needs GTK 3, WebKitGTK 4.1 and libudev; macOS needs Xcode Command Line Tools. See [Build and release instructions (Chinese)](BUILDING.md) and the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/).
 
 ### Run from source
 
