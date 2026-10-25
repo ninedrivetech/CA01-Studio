@@ -154,14 +154,38 @@ jobs:
           '@
           New-Item -ItemType Directory -Path test-results -Force | Out-Null
           Set-Content -LiteralPath $probeFile -Value $probeSource -Encoding utf8
-          $probe = Start-Process pwsh -ArgumentList @('-NoProfile','-File',"`"$probeFile`"",'-OutputPath',"`"$probeOutput`"") -WindowStyle Hidden -PassThru
+          $probe = $null
+          $policyRestore = $null
+          $policyPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge\WebView2\AdditionalBrowserArguments'
+          $policyName = 'zhiliao-studio.exe'
+          $isElevated = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+          Write-Output "Native test elevated: $isElevated"
           $nativeExit = 1
           try {
+            if ($isElevated) {
+              New-Item -Path $policyPath -Force | Out-Null
+              $policyKey = Get-Item -LiteralPath $policyPath
+              $existed = $policyKey.GetValueNames() -contains $policyName
+              $policyRestore = @{
+                Existed=$existed
+                Value=$policyKey.GetValue($policyName)
+                Kind=$(if ($existed) { $policyKey.GetValueKind($policyName).ToString() } else { 'String' })
+              }
+              New-ItemProperty -LiteralPath $policyPath -Name $policyName -Value '--remote-debugging-port=9236' -PropertyType String -Force | Out-Null
+            }
+            $probe = Start-Process pwsh -ArgumentList @('-NoProfile','-File',"`"$probeFile`"",'-OutputPath',"`"$probeOutput`"") -WindowStyle Hidden -PassThru
             npm run test:native
             $nativeExit = $LASTEXITCODE
           } finally {
-            if (-not $probe.WaitForExit(10000)) { Stop-Process -Id $probe.Id -Force }
+            if ($probe -and -not $probe.WaitForExit(10000)) { Stop-Process -Id $probe.Id -Force }
             if (Test-Path -LiteralPath $probeOutput) { Get-Content -LiteralPath $probeOutput }
+            if ($policyRestore) {
+              if ($policyRestore.Existed) {
+                New-ItemProperty -LiteralPath $policyPath -Name $policyName -Value $policyRestore.Value -PropertyType $policyRestore.Kind -Force | Out-Null
+              } else {
+                Remove-ItemProperty -LiteralPath $policyPath -Name $policyName -ErrorAction Stop
+              }
+            }
           }
           exit $nativeExit
       - name: Linux packaged app smoke test
