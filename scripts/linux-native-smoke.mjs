@@ -41,6 +41,7 @@ const exported = [];
 const report = {
   runtime: "Tauri / WebKitGTK",
   binary,
+  harnessCommit: process.env.CICADA_TEST_HARNESS_SHA || null,
   date: new Date().toISOString(),
   checks: [],
   hardwareTested: false,
@@ -66,14 +67,18 @@ const invoke = (command, args = {}) =>
       "const done = arguments[arguments.length-1]; window.__TAURI_INTERNALS__.invoke(arguments[0], arguments[1]).then(value => done({ok:true,value}), error => done({ok:false,error:String(error)}));",
     args: [command, args],
   });
-async function waitFor(script) {
+async function waitFor(script, args = []) {
   for (let attempt = 0; attempt < 100; attempt++) {
-    if (await execute(script)) return;
+    if (await execute(script, args)) return;
     await delay(100);
   }
   throw new Error(`Timed out waiting for: ${script}`);
 }
 async function click(label) {
+  await waitFor(
+    "const button=[...document.querySelectorAll('button')].find(button=>(button.getAttribute('aria-label')||button.textContent.trim())===arguments[0]); return !!button && !button.disabled;",
+    [label],
+  );
   assert.equal(
     await execute(
       "const button=[...document.querySelectorAll('button')].find(button=>(button.getAttribute('aria-label')||button.textContent.trim())===arguments[0]); if(!button || button.disabled) return false; button.click(); return true;",
