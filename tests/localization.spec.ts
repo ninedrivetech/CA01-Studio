@@ -10,6 +10,7 @@ test('完整英文界面、运行状态和日志，切换保留草稿与设备�
   await expect(page).toHaveTitle('Cicada One · CICADA-1');
   await expect(page.getByLabel('Speech text', { exact: true })).toHaveValue(text);
   await expect(page.getByRole('combobox', { name: 'Voice', exact: true })).toHaveValue('56');
+  await expect(page.getByRole('combobox', { name: 'Voice', exact: true }).locator('option:checked')).toHaveText('Voice 7 · Boy');
   await page.getByRole('button', { name: 'Connect', exact: true }).click();
   await expect(page.getByText('Synced from device')).toBeVisible();
   await page.getByRole('button', { name: 'Speak', exact: true }).click();

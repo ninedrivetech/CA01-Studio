@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { encode, frame, speechFrames, ReplyParser } from "./protocol";
+import { encode, frame, speechFrames, voices, ReplyParser } from "./protocol";
 describe("协议编码与报文", () => {
+  it("音色选项保留设备发音人编号", () =>
+    expect(voices.map(([id]) => id)).toEqual([3, 51, 52, 53, 54, 55, 56, 57]));
   it("GBK 文本帧", () =>
     expect(speechFrames("你好", 1)[0]).toEqual([
       0xfd, 0, 6, 1, 1, 0xc4, 0xe3, 0xba, 0xc3,

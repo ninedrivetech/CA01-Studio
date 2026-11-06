@@ -3,9 +3,11 @@ async function connect(page:import('@playwright/test').Page){await page.goto('/'
 test('单页参数保存、播放暂停继续与日志导出',async({page})=>{
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await connect(page);
   await page.getByRole('combobox',{name:'发音人',exact:true}).selectOption('55');
+  await expect(page.getByRole('combobox',{name:'发音人',exact:true}).locator('option:checked')).toHaveText('音色 6 · 女童');
   await expect(page.getByText('有未保存修改')).toBeVisible();
   await page.getByRole('button',{name:'保存参数',exact:true}).click();
   await expect(page.getByRole('status')).toContainText('参数已保存并读回');
+  await expect(page.locator('.log-row').filter({hasText:'5B 6D 35 35 5D'})).toBeVisible();
   await page.getByRole('button',{name:'关闭提示'}).click();
   await page.getByRole('button',{name:'开始播报'}).click();
   await page.getByRole('button',{name:'暂停',exact:true}).click();
